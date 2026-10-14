@@ -114,12 +114,13 @@ table.jt{min-width:0}
 .sign>div{width:70mm;break-inside:avoid;line-height:1.25}.sign .sp{height:20mm}.sign .ttd{height:18mm}.sign .stp{height:20mm}.docs>.doc{padding-bottom:6mm}
 small{font-size:8pt}
 }
+.lg{max-width:400px;margin:28px auto}.lg h2{margin:0 0 4px}.lg label{display:block;margin:10px 0 3px;font-weight:600}.lg input[type=text],.lg input[type=password]{width:100%;padding:9px 10px;font-size:15px}.lg .b{width:100%;margin-top:14px;padding:10px;font-weight:700}.lg .am{margin-top:10px;padding:8px 10px;border-radius:8px;border:1px solid var(--bad);color:var(--bad);font-weight:600}.lg .ai{margin-top:10px;padding:8px 10px;border-radius:8px;border:1px solid var(--ok);color:var(--ok);font-weight:600}.lg .sw{display:flex;gap:6px;align-items:center;margin-top:8px;font-weight:400}
 </style><style id="pgs"></style></head><body>
 <header class="hd"><div class="hd-in"><div class="hd-logo" aria-hidden="true"><svg viewBox="0 0 36 36" fill="none"><rect x="3" y="5" width="30" height="27" rx="5" stroke="#fff" stroke-width="2.2"/><path d="M3 12h30" stroke="#fff" stroke-width="2.2"/><path d="M10 3v5M26 3v5" stroke="#fff" stroke-width="2.2" stroke-linecap="round"/><rect x="8" y="16" width="6" height="5" rx="1.4" fill="#fff" opacity=".85"/><rect x="15" y="16" width="6" height="5" rx="1.4" fill="#ffe08a"/><rect x="22" y="16" width="6" height="5" rx="1.4" fill="#fff" opacity=".85"/><rect x="8" y="23" width="6" height="5" rx="1.4" fill="#fff" opacity=".55"/><rect x="15" y="23" width="6" height="5" rx="1.4" fill="#fff" opacity=".85"/></svg></div><div class="hd-tx"><div class="hd-top"><h1>SMART</h1><span class="hd-badge">Jadwal Pelajaran Digital</span></div><p class="hd-sub"><b>S</b>istem <b>M</b>anajemen <b>A</b>lokasi, <b>R</b>uang, dan <b>T</b>ugas Pembelajaran Terintegrasi</p><div class="hd-meta"><span class="hd-chip">UPTD SPF SD Negeri Lanas 1</span><span class="hd-chip" id="hta">TA 2026/2027</span><span class="hd-chip" id="hsem">Semester Ganjil</span></div></div></div></header>
 <nav id="nav"></nav><main id="app"></main>
 <script>
 const $=s=>document.querySelector(s),esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const DAYS=['Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'],TABS=[['dash','Dashboard'],['data','Data & Alokasi JP'],['kelas','Jadwal Kelas'],['guru','Jadwal Guru'],['cek','Pemeriksaan & Beban'],['exp','Ekspor / Cadangan']];
+const DAYS=['Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'],TABS=[['dash','Dashboard'],['data','Data & Alokasi JP'],['kelas','Jadwal Kelas'],['guru','Jadwal Guru'],['cek','Pemeriksaan & Beban'],['exp','Ekspor / Cadangan'],['akun','Akun']];
 let S,tab='dash',selC=0,msg='',editMode=false;
 /* Struktur Kurikulum SD/MI — Permendikdasmen No. 13 Tahun 2025, Lampiran II.B (Tabel 1–5).
    Nilai = [intrakurikuler, kokurikuler] JP per TAHUN; w = minggu efektif (1 tahun = 36 minggu, Kelas VI = 32); 1 JP = 35 menit.
@@ -338,7 +339,7 @@ leg=ids=>`<div class="leg"><b>Keterangan kode mapel:</b><ul>${ids.map(s=>`<li><s
 function printBar(allowMode){const o=(a)=>a;return`<div class="card np"><div class="row"><b>Atur cetak:</b>${allowMode?`<label>Tampilan ${sel([['per','Per kelas (1 halaman tiap kelas)'],['all','Semua kelas dalam 1 lembar']],S.pr.mode,"act('setPr','mode',this.value)")}</label>`:''}<label>Kertas ${sel([['A4','A4 (210×297 mm)'],['F4','F4/Folio (215×330 mm)'],['Letter','Letter (216×279 mm)']],S.pr.size,"act('setPr','size',this.value)")}</label><label>Orientasi ${sel([['portrait','Potret'],['landscape','Lanskap']],S.pr.ori,"act('setPr','ori',this.value)")}</label><button class="b p" onclick="doPrint()">Cetak</button></div><small>Ukuran baris, huruf, dan KOP disesuaikan otomatis dengan ukuran kertas. Pada dialog cetak, pilih ukuran kertas yang sama dan skala 100%.</small></div>`}
 function allDoc(R){const ids=S.subjects.map((_,s)=>s).filter(s=>S.classes.some((_,c)=>+S.jp[c+'_'+s]>0));
 return`<div class="card doc all" style="${fit('all',ids.length,107)}">${kop()}<div class="dt"><span class="bn">JADWAL PELAJARAN SEMUA KELAS</span><span class="ta">TAHUN PELAJARAN ${taTxt()}</span></div><div class="allg">${S.classes.map((c,i)=>`<div class="mini" style="${kth(i)}"><div class="mt">KELAS ${c}</div>${grid((d,p)=>{if(p>=es(i,d))return'<td class="x">·</td>';const s=S.sched[i][d][p],bad=R.cell[i+'_'+d+'_'+p];return`<td class="cd ${s>=0?'cl':''} ${bad?'bad':''}" ${s>=0?`style="${sty(s)}"`:''}>${s>=0?esc(cd(s)):''}</td>`},Math.max(...S.slots),'mini')}</div>`).join('')}</div><div class="bot">${leg(ids)}${sign()}</div>${ft()}</div>`}
-function draw(){const R=validate(),[st,sc]=status(R);$('#nav').innerHTML=TABS.map(([k,l])=>`<button class="${tab==k?'on':''}" onclick="tab='${k}';render()">${l}</button>`).join('');
+function draw(){if(!authUser){drawLogin();return}const R=validate(),[st,sc]=status(R);$('#nav').innerHTML=TABS.map(([k,l])=>`<button class="${tab==k?'on':''}" onclick="tab='${k}';render()">${l}</button>`).join('')+`<button onclick="doLogout()" title="Keluar dari akun ${esc(authUser)}">Keluar</button>`;
 $('#pgs').textContent=pageCSS();
 const stTag=`<span class="tag ${sc}">${st}</span>`;let h=msg?`<div class="card np"><b>${esc(msg)}</b></div>`:'';msg='';
 if(S.demo)h+='<div class="card warn np"><b>DATA UJI COBA.</b> Target JP yang terisi adalah angka contoh teknis, bukan struktur kurikulum resmi. Jadwal tidak dapat berstatus FINAL selama data ini dipakai. Gunakan "Kosongkan JP" di menu Data lalu isi dari dokumen resmi.</div>';
@@ -364,8 +365,38 @@ if(tab=='guru'){if(!S.sched)h+='<div class="card">Belum ada jadwal.</div>';else{
 if(tab=='cek'){h+=`<div class="card"><h2>Pemeriksaan konflik & JP</h2>${stTag}`+(S.sched?(R.err.length?`<ul>${R.err.map(e=>`<li class="er">${esc(e)}</li>`).join('')}</ul>`:'<p class="ok">Tidak ada bentrok guru/kelas, JP sesuai target, PAIPB/PJOK tidak terpecah, PJOK berada di JP 1–3 (sesuai batas JP), JP satu mapel pada satu hari berurutan, mapel utama tidak dipecah-pecah, setiap guru mengajar di semua hari belajar (sesuai jumlah sesinya), hari PJOK dan batas JP kelas dipenuhi, kokurikuler berada di akhir hari, dan jumlah mapel per hari tidak melebihi batas.</p>'):'<p>Belum ada jadwal.</p>')+`</div>
 <div class="card"><h2>Analisis beban mengajar</h2><div class="sc"><table><tr><th>Guru</th><th>JP target</th><th>JP terjadwal</th><th>Selisih</th><th>Hari</th><th>Jam kosong</th><th>Status</th></tr>${S.teachers.map((t,i)=>{const x=R.tl[i],df=x.act-x.tgt,ok=S.sched&&df==0;if(!x.tgt)return`<tr><td>${esc(t.n)}</td><td>0</td><td>-</td><td>-</td><td>0</td><td>0</td><td class="wn">Belum ada JP mengajar</td></tr>`;return`<tr><td>${esc(t.n)}</td><td>${x.tgt}</td><td>${S.sched?x.act:'-'}</td><td>${S.sched?df:'-'}</td><td>${x.days}</td><td>${x.gap}</td><td class="${!S.sched?'':ok?(x.gap?'wn':'ok'):'er'}">${!S.sched?'-':ok?(x.gap?'Peringatan':'Valid'):'Tidak valid'}</td></tr>`}).join('')}</table></div><small>Kesesuaian beban kerja guru menurut regulasi harus dinilai terpisah berdasarkan SK pembagian tugas resmi.</small></div>
 <div class="card"><h2>Riwayat perubahan</h2><ul>${S.log.slice().reverse().slice(0,30).map(l=>`<li>${esc(l)}</li>`).join('')||'<li>Belum ada.</li>'}</ul></div>`}
+if(tab=='akun')h+=`<div class="card lg"><h2>Akun</h2><p>Masuk sebagai <b>${esc(authUser)}</b>.</p><small>Akun dikelola oleh administrator dan berlaku di semua perangkat. Aplikasi tidak menyediakan pendaftaran atau penggantian kata sandi sendiri.</small><button class="b" onclick="doLogout()">Keluar</button></div>`;
 if(tab=='exp')h+=`<div class="card"><h2>Ekspor & cadangan</h2><div class="row"><button class="b p" onclick="csv()">Unduh CSV jadwal (bisa dibuka di Excel)</button><button class="b" onclick="printTab('kelas','per')">Cetak Jadwal Kelas (1 halaman/kelas)</button><button class="b" onclick="printTab('kelas','all')">Cetak Semua Kelas (1 lembar)</button><button class="b" onclick="printTab('guru')">Cetak Jadwal Guru</button><button class="b g" onclick="bak()">Cadangkan data (JSON)</button><label class="b">Pulihkan JSON <input type="file" accept=".json" hidden onchange="imp(event)"></label><button class="b" onclick="reset()">Reset data</button></div><p>Data tersimpan di browser perangkat ini. Unduh cadangan secara berkala. Impor JSON diperiksa dulu; berkas rusak ditolak tanpa mengubah data.</p></div>`;
 $('#app').innerHTML=h}
 function render(){try{draw();const h=document.getElementById('hta'),hs=document.getElementById('hsem');if(h)h.textContent='Tahun Ajaran '+S.ta;if(hs)hs.textContent='Semester '+S.sem}catch(e){console.error(e);$('#app').innerHTML=`<div class="card"><h2>Terjadi kesalahan saat menampilkan data</h2><p class="er">${esc(e.message)}</p><p>Data tidak dihapus. Unduh salinannya, atau atur ulang ke data awal.</p><div class="row"><button class="b" onclick="bak()">Unduh salinan data (JSON)</button><button class="b d" onclick="reset()">Atur ulang ke data awal</button></div></div>`}}
+
+/* ===== LOGIN ===== */
+/* Akun ditetapkan administrator di sini (berlaku di semua perangkat). Kata sandi disimpan sebagai hash, bukan teks asli.
+   Tidak ada pendaftaran mandiri. Untuk menambah/mengganti akun, ubah daftar USERS ini. */
+const AUTH_SALT='lanas1-smart',SESS_KEY='lss_sess';
+const USERS=[{u:'admin',s:'3daad2a61d9c812391a02e35ede9c81d53976a565952499185aa242a32b03dc8',f:'2a39f76ddb2b034f'}];
+let authUser='',authMsg='',failN=0,lockUntil=0;
+function authLoad(){try{localStorage.removeItem('lss_auth')}catch(e){}
+ try{const u=sessionStorage.getItem(SESS_KEY)||'';authUser=USERS.some(x=>x.u===u)?u:''}catch(e){authUser=''}}
+function hasSubtle(){return !!(window.crypto&&crypto.subtle&&window.TextEncoder)}
+async function hashPw(u,p){const t=AUTH_SALT+'|'+u.toLowerCase()+'|'+p;
+ if(hasSubtle()){const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(t));return['s',Array.from(new Uint8Array(b)).map(x=>x.toString(16).padStart(2,'0')).join('')]}
+ let a=5381,b=52711;for(let i=0;i<t.length;i++){const c=t.charCodeAt(i);a=((a<<5)+a^c)>>>0;b=((b<<5)+b^c*31)>>>0}return['f',a.toString(16)+b.toString(16)]}
+function startSess(u){authUser=u;try{sessionStorage.setItem(SESS_KEY,u)}catch(e){}tab='dash';failN=0}
+function doLogout(){authUser='';authMsg='';try{sessionStorage.removeItem(SESS_KEY)}catch(e){}tab='dash';render()}
+function tglPw(on){document.querySelectorAll('.lg input[name=p]').forEach(i=>{i.type=on?'text':'password'})}
+function drawLogin(){
+ $('#nav').innerHTML='<button class="on">Login</button>';
+ $('#app').innerHTML=`<div class="card lg np"><h2>Login</h2><small>Masuk dengan akun dari administrator untuk mengelola jadwal pelajaran SDN Lanas 1.</small>${authMsg?`<div class="am" role="alert">${esc(authMsg)}</div>`:''}<form onsubmit="doLogin(event);return false" autocomplete="on"><label for="lu">Nama pengguna</label><input id="lu" name="u" type="text" autocomplete="username" autocapitalize="none" required><label for="lp">Kata sandi</label><input id="lp" name="p" type="password" autocomplete="current-password" required><label class="sw"><input type="checkbox" onchange="tglPw(this.checked)"> Tampilkan kata sandi</label><button class="b p" type="submit">Masuk</button></form></div>`;
+ authMsg='';const f=document.getElementById('lu');if(f)setTimeout(()=>f.focus(),0)}
+async function doLogin(e){e.preventDefault();const f=e.target.elements,u=f.u.value.trim(),p=f.p.value;
+ try{
+  if(Date.now()<lockUntil)authMsg='Terlalu banyak percobaan. Coba lagi dalam '+Math.ceil((lockUntil-Date.now())/1000)+' detik.';
+  else{const [m,h]=await hashPw(u,p),acc=USERS.find(x=>x.u.toLowerCase()===u.toLowerCase());
+   if(acc&&acc[m]===h)startSess(acc.u);
+   else{failN++;authMsg='Nama pengguna atau kata sandi salah.';if(failN>=5){lockUntil=Date.now()+30000;failN=0;authMsg+=' Login dikunci 30 detik.'}}}
+ }catch(x){authMsg='Login gagal: '+x.message}
+ render()}
+authLoad();
 load();render();
 </script></body></html>

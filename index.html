@@ -220,6 +220,8 @@ button,.b,select,label.b{touch-action:manipulation;-webkit-tap-highlight-color:t
  .ov{align-items:flex-end;padding:0}
  .md{max-width:none;border-radius:18px 18px 0 0;padding:20px 16px calc(16px + env(safe-area-inset-bottom,0px))}
  .md .row .b{flex:1 1 calc(50% - 10px);min-height:50px}
+ .up input[type=file]{width:100%;font-size:14px}
+ .up input[type=file]::file-selector-button,label.b input[type=file]::file-selector-button{min-height:44px;padding:8px 14px;margin-right:10px;border:1px solid var(--pri);border-radius:10px;background:var(--pri);color:#fff;font:inherit;font-weight:700}
  .lg{margin:16px auto}
 }
 </style><style id="pgs"></style></head><body>
@@ -393,14 +395,32 @@ function setTeach(i,v){S.teachers[i].n=v}function addT(){S.teachers.push({n:'Gur
 function setCode(i,v){S.codes[i]=v.trim().toUpperCase()}function setWin(i,v){S.win[i]=Math.max(0,Math.min(12,Math.floor(+v)||0));S.sched&&(msg='Batas JP berubah — Generate ulang jadwal.')}function setPjok(v){S.pjokMode=v;S.sched&&(msg='Urutan hari PJOK berubah — Generate ulang jadwal.')}function setCmax(i,v){S.cmax[i]=Math.max(0,Math.min(12,Math.floor(+v)||0));S.sched&&(msg='Batas JP kelas berubah — Generate ulang jadwal.')}function setBlk(i,v){S.blk[i]=v?1:0;S.sched&&(msg='Pengaturan blok berubah — Generate ulang jadwal.')}function setKop(k,v){S.kop[k]=v}
 function setPr(k,v){S.pr[k]=v;if(k=='mode'&&v=='all')S.pr.ori='landscape'}
 function clearImg(k){S.kop[k]='';if(k=='img'){S.kop.imgW=1;S.kop.imgH=.2}}
-function imgUp(key,maxW,e){const f=e.target.files[0];e.target.value='';if(!f)return;
-if(!/^image\/(png|jpe?g|webp)$/.test(f.type)){msg='Format gambar harus PNG, JPG, atau WebP.';render();return}
-const im=new Image(),u=URL.createObjectURL(f);
-im.onload=()=>{URL.revokeObjectURL(u);const sc=Math.min(1,maxW/im.width),w=Math.max(1,Math.round(im.width*sc)),h=Math.max(1,Math.round(im.height*sc)),c=document.createElement('canvas');c.width=w;c.height=h;const x=c.getContext('2d');
-let data;if(f.type==='image/png'){x.drawImage(im,0,0,w,h);data=c.toDataURL('image/png');if(data.length>1.3e6){x.clearRect(0,0,w,h);x.fillStyle='#fff';x.fillRect(0,0,w,h);x.drawImage(im,0,0,w,h);data=c.toDataURL('image/jpeg',.9)}}
-else{x.fillStyle='#fff';x.fillRect(0,0,w,h);x.drawImage(im,0,0,w,h);data=c.toDataURL('image/jpeg',.9)}
-S.kop[key]=data;if(key=='img'){S.kop.imgW=w;S.kop.imgH=h}logc('Unggah gambar '+key);if(save())msg='Gambar diunggah: '+f.name;render()};
-im.onerror=()=>{URL.revokeObjectURL(u);msg='Gambar tidak dapat dibaca.';render()};im.src=u}
+function readBuf(f){return new Promise((ok,no)=>{const r=new FileReader();r.onload=()=>ok(r.result);r.onerror=()=>no(r.error||new Error('baca'));r.readAsArrayBuffer(f)})}
+function sniffImg(buf){const a=new Uint8Array(buf.slice(0,12));
+ if(a[0]==0x89&&a[1]==0x50&&a[2]==0x4E&&a[3]==0x47)return'image/png';if(a[0]==0xFF&&a[1]==0xD8)return'image/jpeg';
+ if(a[0]==0x52&&a[1]==0x49&&a[2]==0x46&&a[3]==0x46&&a[8]==0x57&&a[9]==0x45&&a[10]==0x42&&a[11]==0x50)return'image/webp';
+ if(a[0]==0x47&&a[1]==0x49&&a[2]==0x46)return'image/gif';return''}
+/* Unggah gambar: berkas dibaca ke memori DULU, baru isian dikosongkan (di Android, mengosongkan lebih awal membuat berkas tidak terbaca). */
+async function imgUp(key,maxW,e){const inp=e.target,f=inp.files&&inp.files[0];if(!f)return;
+ let buf;try{buf=await readBuf(f)}catch(x){inp.value='';msg='Gambar tidak dapat dibaca dari perangkat. Pilih ulang gambar dari galeri/penyimpanan HP (bukan dari awan yang belum terunduh).';render();return}
+ inp.value='';
+ const mime=sniffImg(buf)||f.type||'';
+ if(!/^image\//.test(mime)){msg='Berkas yang dipilih bukan gambar. Gunakan JPG, PNG, atau WebP.';render();return}
+ try{
+  const blob=new Blob([buf],{type:mime});let bmp=null;
+  if(window.createImageBitmap){try{bmp=await createImageBitmap(blob)}catch(_){bmp=null}}
+  if(!bmp)bmp=await new Promise((ok,no)=>{const im=new Image(),u=URL.createObjectURL(blob);im.onload=()=>{URL.revokeObjectURL(u);ok(im)};im.onerror=()=>{URL.revokeObjectURL(u);no(new Error('decode'))};im.src=u});
+  const iw=bmp.width,ih=bmp.height;if(!iw||!ih)throw new Error('kosong');
+  const sc=Math.min(1,maxW/iw),w=Math.max(1,Math.round(iw*sc)),h=Math.max(1,Math.round(ih*sc)),c=document.createElement('canvas');c.width=w;c.height=h;const x=c.getContext('2d');
+  const png=mime==='image/png'||((mime==='image/webp'||mime==='image/gif')&&key!=='img');let data;
+  if(png){x.drawImage(bmp,0,0,w,h);data=c.toDataURL('image/png');if(data.length>1.3e6){x.clearRect(0,0,w,h);x.fillStyle='#fff';x.fillRect(0,0,w,h);x.drawImage(bmp,0,0,w,h);data=c.toDataURL('image/jpeg',.9)}}
+  else{x.fillStyle='#fff';x.fillRect(0,0,w,h);x.drawImage(bmp,0,0,w,h);data=c.toDataURL('image/jpeg',.9)}
+  if(bmp.close)try{bmp.close()}catch(_){}
+  if(!/^data:image\/(png|jpe?g|webp);base64,/.test(data))throw new Error('format');
+  S.kop[key]=data;if(key=='img'){S.kop.imgW=w;S.kop.imgH=h}logc('Unggah gambar '+key);
+  if(save())msg='Gambar berhasil diunggah'+(f.name?': '+f.name:'');render()
+ }catch(x){msg='Gambar tidak dapat diproses (format tidak didukung, mis. HEIC). Gunakan foto JPG atau PNG.';render()}}
+function setCamHint(){}
 function doPrint(){document.getElementById('pgs').textContent=pageCSS();try{window.print()}catch(e){msg='Cetak tidak tersedia di tampilan ini. Buka berkas di tab/jendela sendiri lalu cetak.';render()}}
 function printTab(t,mode){tab=t;if(mode){S.pr.mode=mode;if(mode=='all')S.pr.ori='landscape';save()}render();setTimeout(doPrint,200)}
 function dlg(text,ok,cancel){return new Promise(r=>{const d=document.createElement('div');d.className='ov np';d.innerHTML=`<div class="md" role="dialog" aria-modal="true"><p>${esc(text)}</p><div class="row"><button class="b p" id="dy">${esc(ok||'Ya, lanjutkan')}</button><button class="b" id="dn">${esc(cancel||'Batal')}</button></div></div>`;document.body.appendChild(d);const f=v=>{d.remove();r(v)};d.querySelector('#dy').onclick=()=>f(true);d.querySelector('#dn').onclick=()=>f(false);d.addEventListener('keydown',e=>{if(e.key=='Escape')f(false)});d.querySelector('#dn').focus()})}
@@ -419,8 +439,9 @@ if(d){await d.save({filename:name,data:txt});msg='Berkas disimpan: '+name}
 else{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([txt],{type}));a.download=name;document.body.appendChild(a);a.click();a.remove();const u=a.href;setTimeout(()=>URL.revokeObjectURL(u),5000);msg='Unduhan dimulai: '+name+'. Jika berkas tidak muncul, unduhan diblokir oleh peramban/tampilan ini — buka aplikasi di tab sendiri.'}render()}catch(e){msg=(e&&e.code=='declined')?'Unduhan dibatalkan.':'Unduhan gagal: '+((e&&e.message)||e);render()}}
 function csv(){let r=[['Kelas','Hari','JP','Waktu','Kode','Mapel','Guru']];if(S.sched)S.classes.forEach((cn,c)=>DAYS.forEach((dn,d)=>{for(let p=0;p<S.slots[d];p++){const s=S.sched[c][d][p];if(s>=0)r.push([cn,dn,p+1,tm(p)+'-'+te(p),cd(s),S.subjects[s],tn(S.asg[c+'_'+s])])}}));dl('jadwal-lanas1.csv','\ufeff'+r.map(x=>x.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\n'),'text/csv')}
 function bak(){dl('cadangan-jadwal-lanas1.json',JSON.stringify(S),'application/json')}
-async function imp(e){const f=e.target.files[0];e.target.value='';if(!f)return;let o;
-try{o=JSON.parse(await f.text())}catch(x){msg='Impor ditolak: berkas bukan JSON yang valid. Data saat ini tidak diubah.';render();return}
+async function imp(e){const f=e.target.files[0];if(!f)return;let o,txt;
+try{txt=await readBuf(f).then(b=>new TextDecoder('utf-8').decode(b))}catch(x){e.target.value='';msg='Berkas tidak dapat dibaca dari perangkat. Pilih ulang berkas cadangan.';render();return}e.target.value='';
+try{o=JSON.parse(txt.replace(/^\uFEFF/,''))}catch(x){msg='Impor ditolak: berkas bukan JSON yang valid. Data saat ini tidak diubah.';render();return}
 normSched(o);const er=okData(o);if(er){msg='Impor ditolak: '+er+' Data saat ini tidak diubah.';render();return}
 if(!await dlg(`Ganti seluruh data (${S.teachers.length} guru) dengan isi berkas (${o.teachers.length} guru${o.sched?', berisi jadwal':''})? Salinan data saat ini disimpan otomatis pada kunci "lss4_sebelum_impor" di peramban.`,'Ganti data'))return;
 try{localStorage.setItem('lss4_sebelum_impor',JSON.stringify(S))}catch(x){}
@@ -454,7 +475,7 @@ if(tab=='dash'){const tj=Object.values(S.jp).reduce((a,b)=>a+(+b||0),0),act=S.su
 h+=`<div class="card"><h2>Status</h2>${stTag}<div class="row" style="margin-top:10px"><button class="b p" onclick="act('doGen')">Generate Jadwal Otomatis</button><button class="b" onclick="act('lock')">Kunci Jadwal Final</button><button class="b" onclick="act('unlock')">Buka Kunci</button></div></div>
 <div class="card"><h2>Ringkasan</h2><table><tr><th>Guru</th><td>${S.teachers.length}</td><th>Rombel</th><td>6</td><th>Mapel aktif</th><td>${act}</td></tr><tr><th>Total target JP (semua kelas)</th><td>${tj}</td><th>Slot/pekan per kelas</th><td>${S.slots.reduce((a,b)=>a+b,0)}</td><th>Konflik/selisih</th><td class="${R.err.length?'er':'ok'}">${S.sched?R.err.length:'-'}</td></tr></table>${tj==0?'<p class="er"><b>Target JP belum diisi.</b> Isi di menu Data &amp; Alokasi JP sesuai struktur kurikulum SD yang telah diverifikasi dan KSP sekolah.</p>':''}</div>
 <div class="card"><h2>Catatan penting</h2><p>Target JP bawaan mengikuti struktur kurikulum SD pada Permendikdasmen 13/2025 (Lampiran II, Tabel 1–5; pembelajaran mendalam) dan dapat diterapkan ulang lewat tombol "Terapkan JP Permendikdasmen 13/2025" di menu Data. Tetap cocokkan dengan KSP sekolah, lalu centang verifikasi di menu Data. Jam belajar, jumlah JP per hari, dan istirahat bawaan hanyalah nilai awal yang dapat diubah; sesuaikan dengan ketentuan sekolah. Kokurikuler diampu guru kelas dan ditempatkan di akhir hari belajar. PAIPB dan PJOK dijadwalkan sebagai 1 blok JP berurutan dan tidak melewati istirahat; PJOK selalu ditempatkan pada JP 1–3 (dapat diubah di kolom "Hanya di JP 1–N") dengan urutan hari per kelas (bawaan: Kelas I Sabtu, II Jumat, III Kamis, IV Rabu, V Selasa, VI Senin; bisa dibalik di menu Data). Matematika dan IPAS (mapel yang menuntut konsentrasi dan penalaran) juga ditempatkan pada JP 1–3; mapel lain, mis. Bahasa Indonesia atau PP, dapat ditambahkan dengan mengisi kolom "Hanya di JP 1–N" = 3. PAIPB bebas ditempatkan di JP berapa pun, tetapi hanya satu kelas per hari dan tersebar tanpa celah hari (6 kelas = Senin–Sabtu masing-masing satu kelas) (kolom "Hanya di JP 1–N" = 0). Kelas I dibatasi maksimal sampai JP 6 dan Kelas II sampai JP 7. Setiap kelas dibatasi maksimal 5 mata pelajaran berbeda per hari (dapat diubah di menu Data). Kokurikuler dipecah per 2 JP (6 JP = 2+2+2; jumlah ganjil, mis. 7 JP = 3+2+2). Literasi pagi 15 menit mendahului JP 1 setiap hari dan tidak dihitung sebagai JP. Mapel utama (PP, BIND, MTK, dst.) tidak dipecah-pecah: tiap mapel disusun dalam jumlah sesi paling sedikit (maks. sesuai JP berurutan tanpa istirahat, mis. 4 JP = 2+2, 7 JP = 3+2+2), tiap sesi berurutan dalam satu hari. Hanya Kokurikuler yang boleh dipecah. Setiap guru dijadwalkan mengajar di semua hari belajar (sebanyak jumlah sesi yang dimilikinya). Jam belajar Jumat dan Sabtu sampai JP 5. Seluruh hari Senin–Sabtu diisi penuh tanpa celah. Bila total JP suatu kelas lebih sedikit dari slot yang tersedia, kekurangannya dikosongkan di JP terakhir hari Kamis, Rabu, Selasa, lalu Senin (satu JP per hari) dan dicatat setelah Generate. Seluruh guru dianggap tersedia setiap hari. Validasi ruang/sarana belum aktif karena data ruang belum diisi.</p></div>`}
-if(tab=='data'){const up=(k,l,w,hint)=>`<div class="up"><b>${l}</b>${S.kop[k]?`<img class="thumb" src="${S.kop[k]}" alt="${l}">`:'<small>Belum ada</small>'}<input type="file" accept="image/png,image/jpeg,image/webp" onchange="imgUp('${k}',${w},event)" aria-label="Unggah ${l}">${S.kop[k]?`<button class="b s" onclick="act('clearImg','${k}')">Hapus</button>`:''}<small>${hint}</small></div>`;
+if(tab=='data'){const up=(k,l,w,hint)=>`<div class="up"><b>${l}</b>${S.kop[k]?`<img class="thumb" src="${S.kop[k]}" alt="${l}">`:'<small>Belum ada</small>'}<input type="file" accept="image/*" onchange="imgUp('${k}',${w},event)" aria-label="Unggah ${l}">${S.kop[k]?`<button class="b s" onclick="act('clearImg','${k}')">Hapus</button>`:''}<small>${hint}</small></div>`;
 h+=`<div class="card"><h2>Jam belajar</h2><div class="row"><label>Mulai (literasi pagi) <input type="time" value="${S.start}" onchange="act('setCfg','start',this.value)"></label><label>Menit/JP <input type="number" value="${S.jpMin}" onchange="act('setCfg','jpMin',this.value)"></label><label><input type="checkbox" ${S.litOn?'checked':''} onchange="act('setCfg','litOn',this.checked)"> Literasi pagi</label><label>Menit <input type="number" value="${S.litMin}" onchange="act('setCfg','litMin',this.value)"></label><label>Maks JP berurutan per sesi mapel <input type="number" min="1" max="6" value="${S.maxRun}" onchange="act('setCfg','maxRun',this.value)"></label><label>Maks mapel berbeda/hari tiap kelas (0 = bebas) <input type="number" min="0" max="12" value="${S.maxSubj}" onchange="act('setCfg','maxSubj',this.value)"></label>${[['brk1','Istirahat 1 setelah JP ke-'],['brk1Min','Menit'],['brk2','Istirahat 2 setelah JP ke-'],['brk2Min','Menit']].map(([k,l])=>`<label>${l} <input type="number" value="${S[k]}" onchange="act('setCfg','${k}',this.value)"></label>`).join('')}</div>
 <div class="sc"><table><tr><th>Hari</th>${DAYS.map(d=>`<th>${d}</th>`).join('')}</tr><tr><th>Jumlah JP/hari</th>${DAYS.map((_,d)=>`<td><input type="number" value="${S.slots[d]}" onchange="act('setSlot',${d},this.value)"></td>`).join('')}</tr></table></div><div class="row" style="margin-top:8px"><label>Hari PJOK per kelas ${sel([['desc','Kelas I Sabtu → Kelas VI Senin'],['asc','Kelas I Senin → Kelas VI Sabtu'],['free','Bebas (acak)']],S.pjokMode,"act('setPjok',this.value)")}</label></div><div class="row" style="margin-top:6px"><b>Maks JP per hari tiap kelas (0 = ikuti JP hari):</b>${S.classes.map((c,i)=>`<label>Kelas ${c} <input type="number" min="0" max="12" value="${S.cmax[i]||0}" onchange="act('setCmax',${i},this.value)" aria-label="Maksimal JP kelas ${c}"></label>`).join('')}</div><small>Nilai awal ini bukan ketentuan resmi; sesuaikan dengan ketentuan sekolah.</small></div>
 <div class="card"><h2>Daftar nama guru</h2><div class="f">${S.teachers.map((t,i)=>`<input value="${esc(t.n)}" onchange="act('setTeach',${i},this.value)" aria-label="Nama guru ${i+1}">`).join('')}</div><button class="b" style="margin-top:8px" onclick="act('addT')">+ Guru</button></div>
@@ -549,17 +570,145 @@ function scheduleBar(){document.querySelectorAll('.mbar').forEach(x=>x.remove())
  bar.innerHTML=h;
  bar.addEventListener('click',e=>{const b=e.target.closest('.chip2');if(!b)return;const k=b.parentElement.dataset.k,v=+b.dataset.v;
   if(k==='day')mobDay=v;else mobSel[tab]=v;
-  b.parentElement.querySelectorAll('.chip2').forEach(x=>x.classList.toggle('on',x===b));applyDay();applySel();window.scrollTo(0,Math.max(0,bar.offsetTop-4))});
- bar.addEventListener('change',e=>{if(e.target.dataset.k==='selg'){mobSel.guru=+e.target.value;applySel()}});
+  b.parentElement.querySelectorAll('.chip2').forEach(x=>x.classList.toggle('on',x===b));applyDay();applySel();injectPdf();window.scrollTo(0,Math.max(0,bar.offsetTop-4))});
+ bar.addEventListener('change',e=>{if(e.target.dataset.k==='selg'){mobSel.guru=+e.target.value;applySel();injectPdf()}});
  app.prepend(bar);
  const pb=[...app.querySelectorAll(':scope>.card.np')].find(c=>/^Atur cetak/.test((c.querySelector('.row>b')||{}).textContent||''));if(pb)app.appendChild(pb);
  applySel()}
 function post(){try{
  document.body.classList.toggle('islogin',!authUser);
- decorateNav();respTables();toastFromMsg();scheduleBar();applyDay();
+ decorateNav();respTables();toastFromMsg();scheduleBar();applyDay();injectPdf();
  if(!authUser&&firstLogin&&COARSE.matches)setTimeout(()=>{const a=document.activeElement;if(a&&a.id==='lu')a.blur()},60);
  if(authUser)firstLogin=false;
 }catch(e){console.error('mobile',e)}}
+/* ===== Simpan PDF (tanpa fitur cetak browser; cocok untuk HP) ===== */
+const DPI=170,U=DPI/25.4,FONT='"Nunito","Trebuchet MS","Segoe UI",Roboto,Arial,system-ui,sans-serif';
+const RB=['#ff6b8b','#ffa94d','#ffd43b','#51cf66','#4dabf7','#b197fc'],DC=['#ffb3c6','#ffcf9e','#ffe58a','#a9e9bf','#a5d8ff','#d0bfff'];
+let G;
+const rgb=h=>{const n=parseInt(h.slice(1),16);return[n>>16&255,n>>8&255,n&255]};
+const mixW=(h,p)=>{const[r,g2,b]=rgb(h),f=v=>Math.round(v*p+255*(1-p));return'rgb('+f(r)+','+f(g2)+','+f(b)+')'};
+const dark=(h,p)=>{const[r,g2,b]=rgb(h),f=v=>Math.round(v*p);return'rgb('+f(r)+','+f(g2)+','+f(b)+')'};
+const rr=(x,y,w,h,r)=>{r=Math.max(0,Math.min(r,w/2,h/2));G.beginPath();G.moveTo((x+r)*U,y*U);G.arcTo((x+w)*U,y*U,(x+w)*U,(y+h)*U,r*U);G.arcTo((x+w)*U,(y+h)*U,x*U,(y+h)*U,r*U);G.arcTo(x*U,(y+h)*U,x*U,y*U,r*U);G.arcTo(x*U,y*U,(x+w)*U,y*U,r*U);G.closePath()};
+function box(x,y,w,h,r,fill,stroke,lw,dash){rr(x,y,w,h,r);if(fill){G.fillStyle=fill;G.fill()}if(stroke){G.strokeStyle=stroke;G.lineWidth=lw*U;G.setLineDash(dash?dash.map(v=>v*U):[]);G.stroke();G.setLineDash([])}}
+function fnt(sz,b){G.font=(b?'800 ':'600 ')+(sz*U).toFixed(1)+'px '+FONT}
+function tw(t,sz,b){fnt(sz,b);return G.measureText(String(t)).width/U}
+function txt(t,x,y,sz,o){o=o||{};t=String(t);let s=sz;if(o.maxW){while(s>1.3&&tw(t,s,o.b)>o.maxW)s-=.1}
+ fnt(s,o.b);G.fillStyle=o.col||'#2b2540';G.textAlign=o.al||'center';G.textBaseline='middle';G.fillText(t,x*U,y*U);return s}
+function wrapT(t,sz,b,maxW){const ws=String(t||'').split(/\s+/).filter(Boolean),L=[];let cur='';ws.forEach(w=>{const tr=cur?cur+' '+w:w;if(tw(tr,sz,b)>maxW&&cur){L.push(cur);cur=w}else cur=tr});if(cur)L.push(cur);return L}
+function multi(t,cx,cy,maxW,maxH,sz,col){let s=sz,L;for(;;){L=wrapT(t,s,1,maxW);const okW=L.every(l=>tw(l,s,1)<=maxW);if((okW&&L.length*s*1.15<=maxH)||s<=1.3)break;s-=.1}
+ const lh=s*1.15,y0=cy-(L.length-1)*lh/2;L.forEach((l,i)=>txt(l,cx,y0+i*lh,s,{b:1,col}))}
+function hatch(x,y,w,h,r){box(x,y,w,h,r,'#f1f3f5');G.save();rr(x,y,w,h,r);G.clip();G.strokeStyle='#ffffff';G.lineWidth=1.1*U;for(let t=-h;t<w+h;t+=2.4){G.beginPath();G.moveTo((x+t)*U,(y+h)*U);G.lineTo((x+t+h)*U,y*U);G.stroke()}G.restore()}
+function stripes(x,y,w,h,r){box(x,y,w,h,r,'#fff3bf');G.save();rr(x,y,w,h,r);G.clip();G.strokeStyle='#ffe69c';G.lineWidth=2*U;for(let t=-h;t<w+h;t+=4){G.beginPath();G.moveTo((x+t)*U,(y+h)*U);G.lineTo((x+t+h)*U,y*U);G.stroke()}G.restore()}
+const loadImg=src=>new Promise(ok=>{if(!src)return ok(null);const im=new Image();im.onload=()=>ok(im);im.onerror=()=>ok(null);im.src=src});
+async function loadAll(){const k=S.kop;return{img:await loadImg(k.img),logo:await loadImg(k.logo),ttd:await loadImg(k.ttd),stp:await loadImg(k.stp)}}
+function paperFor(kind){const p=PAPER[S.pr.size]||PAPER.A4;return(kind==='all'||S.pr.ori==='landscape')?[p[1],p[0]]:[p[0],p[1]]}
+function pKop(I,x,y,w,kind,H){const K=S.kop;
+ if(I.img){const kr=I.img.height/I.img.width,cap=Math.min(55,H*(kind==='all'?.15:.17)),kw=Math.min(w,cap/kr),h=kw*kr,xx=x+(w-kw)/2;G.fillStyle='#fff';G.fillRect(xx*U,y*U,kw*U,h*U);G.drawImage(I.img,xx*U,y*U,kw*U,h*U);y+=h+1.2}
+ else{const ks=Math.max(.75,Math.min(1.2,Math.min((w-10)/180,H/250))),lgH=26*ks-4;let lw=0;
+  if(I.logo){lw=Math.min(I.logo.width/I.logo.height*lgH,26*ks*1.4)}
+  const avail=w-(lw?lw+4:0),rows=[];
+  [K.i1,K.i2].filter(Boolean).forEach(t=>wrapT(t,3.9*ks,0,avail).forEach(l=>rows.push([l,3.9*ks,0,'#2b2540'])));
+  wrapT(K.sk,5.3*ks,1,avail).forEach(l=>rows.push([l,5.3*ks,1,'#1f2a6b']));
+  wrapT(K.al,3.2*ks,0,avail).forEach(l=>rows.push([l,3.2*ks,0,'#2b2540']));
+  const th=rows.reduce((a,r)=>a+r[1]*1.3,0),bh=Math.max(26*ks,th+1);
+  if(I.logo)G.drawImage(I.logo,x*U,(y+(bh-lgH)/2)*U,lw*U,lgH*U);
+  const cx=x+(lw?lw+4:0)+avail/2;let yy=y+(bh-th)/2;rows.forEach(r=>{txt(r[0],cx,yy+r[1]*.65,r[1],{b:r[2],col:r[3]});yy+=r[1]*1.3});
+  y+=bh+1.5}
+ const gr=G.createLinearGradient(x*U,0,(x+w)*U,0);RB.forEach((c,i)=>gr.addColorStop(i/(RB.length-1),c));G.fillStyle=gr;G.fillRect(x*U,y*U,w*U,1.2*U);return y+1.2+2.2}
+function pTitle(y,cx,w,t1,k,kt,ta){const sz=4.2,h=sz+2.6,pw=Math.min(w,tw(t1,sz,1)+14);
+ box(cx-pw/2,y+.8,pw,h,h/2,dark(k,.55));box(cx-pw/2,y,pw,h,h/2,k);txt(t1,cx,y+h/2,sz,{b:1,col:kt,maxW:pw-6});
+ txt(ta,cx,y+h+3.2,3.3,{b:1,col:'#5f3dc4',maxW:w});return y+h+3.2+4}
+function pTable(o){const{x,w,k,kt}=o;let y=o.y;const rh=o.rh,gap=.7,mx=Math.max(...S.slots),wj=w*.06,ww=w*.15,wd=(w-wj-ww)/6,fs=o.fs,rad=Math.min(1.6,rh/3);
+ const cx=i=>i==0?x:i==1?x+wj:x+wj+ww+(i-2)*wd,cw=i=>i==0?wj:i==1?ww:wd;
+ const B=(i,span,yy,hh)=>[cx(i)+gap/2,yy+gap/2,cx(i+span-1)+cw(i+span-1)-cx(i)-gap,hh-gap];
+ const hb=(i,t,bg,col,yy,hh,span,sz)=>{const[bx,by,bw,bh]=B(i,span||1,yy,hh);box(bx,by,bw,bh,rad,bg);txt(t,bx+bw/2,by+bh/2,sz||fs,{b:1,col,maxW:bw-.8})};
+ hb(0,'JP',k,kt,y,rh);hb(1,'Waktu',k,kt,y,rh);DAYS.forEach((d,i)=>hb(i+2,d,DC[i%6],'#2b2540',y,rh,1,fs*.95));y+=rh;
+ if(S.litOn&&S.litMin>0){const[hh,mm]=S.start.split(':').map(Number),a=hh*60+mm,h2=rh*.7,sz=Math.min(fs*.8,h2*.5);
+  hb(0,'Lit','#d0ebff','#1864ab',y,h2,1,sz);hb(1,hm(a)+'–'+hm(a+S.litMin),'#d0ebff','#1864ab',y,h2,1,sz);hb(2,'LITERASI PAGI · '+S.litMin+' menit','#d0ebff','#1864ab',y,h2,DAYS.length,sz);y+=h2}
+ for(let p=0;p<mx;p++){const jb=mixW(k,.28);hb(0,String(p+1),jb,'#2b2540',y,rh,1,fs);hb(1,tm(p)+'–'+te(p),jb,'#2b2540',y,rh,1,Math.min(fs*.75,rh*.3));
+  DAYS.forEach((_,d)=>{const[bx,by,bw,bh]=B(d+2,1,y,rh),c=o.cell(d,p)||{};
+   if(c.x){hatch(bx,by,bw,bh,rad);return}
+   if(c.c){box(bx,by,bw,bh,rad,c.c);G.fillStyle=c.i;G.fillRect((bx+rad)*U,(by+bh-.45)*U,(bw-2*rad)*U,.45*U)}else box(bx,by,bw,bh,rad,'#ffffff','#ced4da',.3,[1,.8]);
+   if(c.t)multi(c.t,bx+bw/2,by+bh/2-.1,bw-1,bh-.6,fs,c.i||'#2b2540')});
+  y+=rh;
+  for(const[b,m,n]of[[S.brk1,S.brk1Min,1],[S.brk2,S.brk2Min,2]])if(b>0&&p+1==b&&mx>b){const a=pm(p)+S.jpMin,h2=rh*.7,[bx,by,bw,bh]=B(0,8,y,h2);stripes(bx,by,bw,bh,rad);txt('ISTIRAHAT '+n+' · '+hm(a)+'–'+hm(a+m)+' ('+m+' menit)',bx+bw/2,by+bh/2,Math.min(fs*.8,h2*.5),{b:1,col:'#8a5a00',maxW:bw-2});y+=h2}}
+ return y}
+function pLegend(x,y,w,ids,cols,sz){txt('Keterangan kode mapel:',x,y+2,sz,{b:1,col:'#5f3dc4',al:'left'});const pitch=sz*1.6,y0=y+6,n=Math.max(1,Math.ceil(ids.length/cols)),cwid=w/cols;
+ ids.forEach((s,i)=>{const cc=Math.floor(i/n),r=i%n,xx=x+cc*cwid,yy=y0+r*pitch,code=cd(s),bw=Math.max(sz*3.4,tw(code,sz*.85,1)+3.4),col=sb(s);
+  box(xx,yy-sz*.55,bw,sz*1.1,sz*.55,col[2],col[3],.3);txt(code,xx+bw/2,yy,sz*.85,{b:1,col:col[3]});txt(S.subjects[s],xx+bw+1.4,yy,sz,{al:'left',maxW:cwid-bw-2.4})});
+ return 6+n*pitch+1}
+function pSign(I,xr,y,maxw){const K=S.kop;if(!K.showSign)return 0;const bw=Math.min(70,maxw),cx=xr-bw/2,sz=3.5;let yy=y+2;
+ txt(K.kota+', '+fd(K.tgl?new Date(K.tgl):new Date()),cx,yy,sz,{maxW:bw});yy+=sz*1.3;txt(K.jab,cx,yy,sz,{maxW:bw});yy+=sz*.9;
+ if(I.stp){const h=20,w2=I.stp.width/I.stp.height*h;G.save();G.globalAlpha=.85;G.globalCompositeOperation='multiply';G.drawImage(I.stp,(cx-bw/2+bw*.1)*U,(yy-1)*U,w2*U,h*U);G.restore()}
+ if(I.ttd){const h=18,w2=I.ttd.width/I.ttd.height*h;G.drawImage(I.ttd,(cx-w2/2)*U,yy*U,w2*U,h*U)}
+ yy+=22;const s2=txt(K.kepsek,cx,yy,sz,{b:1,col:'#000',maxW:bw}),w3=tw(K.kepsek,s2,1);G.fillStyle='#000';G.fillRect((cx-w3/2)*U,(yy+s2*.62)*U,w3*U,.25*U);
+ yy+=sz*1.3;txt('NIP. '+K.nip,cx,yy,sz,{maxW:bw});return yy+3-y}
+function renderPage(kind,idx,I){const[pw,ph]=paperFor(kind),m=S.pr.m,W=pw-2*m,H=ph-2*m;
+ const c=document.createElement('canvas');c.width=Math.round(pw*U);c.height=Math.round(ph*U);G=c.getContext('2d');G.fillStyle='#fff';G.fillRect(0,0,c.width,c.height);
+ const th=kind==='per'?idx%6:kind==='guru'?6:7,[k,kl,kt]=KC[th%KC.length];
+ box(m,m,W,H,3.5,'#fffdf8');G.fillStyle=kl;for(let yy=m+3;yy<m+H-2;yy+=4.5)for(let xx=m+3;xx<m+W-2;xx+=4.5){G.beginPath();G.arc(xx*U,yy*U,.3*U,0,6.2832);G.fill()}
+ box(m+1.2,m+1.2,W-2.4,H-2.4,4,null,k,.7,[2.2,1.6]);
+ const x=m+5,w=W-10,bottom=m+H-4,mx=Math.max(...S.slots),nb=[S.brk1,S.brk2].filter(b=>b>0&&mx>b).length,rows=1+mx+nb*.7+(S.litOn&&S.litMin>0?.7:0),sgH=S.kop.showSign?50:0;
+ let y=pKop(I,x,m+4,w,kind,H);const cxm=x+w/2;
+ txt('Belajar dengan gembira, tumbuh bersama!',cxm,bottom-2,3.3,{b:1,col:'#5f3dc4',maxW:w});const bot2=bottom-6;
+ if(kind==='all'){
+  y=pTitle(y,cxm,w,'JADWAL PELAJARAN SEMUA KELAS',k,kt,'TAHUN PELAJARAN '+taTxt());
+  const ids=S.subjects.map((_,s)=>s).filter(s=>S.classes.some((_,c2)=>+S.jp[c2+'_'+s]>0)),lsz=2.9,legH=6+Math.ceil(ids.length/4)*lsz*1.6+1,sgw=Math.min(70,w*.4),sgH2=sgH,botH=Math.max(legH,sgH2);
+  const gc=pw>ph?3:2,gr=Math.ceil(6/gc),cw=(w-(gc-1)*4)/gc,avail=bot2-botH-3-y,chH=(avail-(gr-1)*3)/gr,rh=Math.max(3,Math.min(8,(chH-6.5)/rows)),fs=Math.max(1.7,Math.min(3.2,rh*.4));
+  S.classes.forEach((cn,i)=>{const cc=i%gc,rw=Math.floor(i/gc),xx=x+cc*(cw+4),yy=y+rw*(chH+3),[k2,,kt2]=KC[i%KC.length],pwid=Math.min(cw,tw('KELAS '+cn,3.4,1)+14);
+   box(xx+(cw-pwid)/2,yy,pwid,5,2.5,k2);txt('KELAS '+cn,xx+cw/2,yy+2.6,3.4,{b:1,col:kt2});
+   pTable({x:xx,y:yy+5.6,w:cw,rh,fs,k:k2,kt:kt2,cell:(d,p)=>{if(p>=S.slots[d]||p>=es(i,d))return{x:1};const s=S.sched[i][d][p];return s>=0?{t:cd(s),c:sb(s)[2],i:sb(s)[3]}:{}}})});
+  const by=bot2-botH;pLegend(x,by,w-sgw-4,ids,4,lsz);pSign(I,x+w,by,sgw)
+ }else{
+  const ti=idx;let ids;
+  if(kind==='per'){ids=S.subjects.map((_,s)=>s).filter(s=>S.jp[idx+'_'+s]>0);y=pTitle(y,cxm,w,'JADWAL PELAJARAN KELAS '+S.classes[idx],k,kt,'TAHUN PELAJARAN '+taTxt())}
+  else{const set=new Set();S.classes.forEach((cn,c2)=>{DAYS.forEach((_,d)=>{S.sched[c2][d].forEach(s=>{if(s>=0&&S.asg[c2+'_'+s]==ti)set.add(s)})})});ids=[...set].sort((a,b)=>a-b);
+   y=pTitle(y,cxm,w,'JADWAL MENGAJAR',k,kt,'TAHUN PELAJARAN '+taTxt());txt(S.teachers[ti].n,cxm,y+1.5,4.2,{b:1,col:dark(k,.75),maxW:w});y+=6}
+  const lsz=3.2,legH=6+Math.ceil(ids.length/2)*lsz*1.6+1,avail=bot2-sgH-legH-4-y,rh=Math.max(6,Math.min(13,avail/rows)),fs=Math.max(2.6,Math.min(3.9,rh*.38));
+  const cell=kind==='per'?(d,p)=>{if(p>=S.slots[d]||p>=es(idx,d))return{x:1};const s=S.sched[idx][d][p];return s>=0?{t:cd(s),c:sb(s)[2],i:sb(s)[3]}:{t:'—'}}
+   :(d,p)=>{if(p>=S.slots[d])return{x:1};const xs=[];let f=-1;S.classes.forEach((cn,c2)=>{const s=S.sched[c2][d][p];if(s>=0&&S.asg[c2+'_'+s]==ti){xs.push(cd(s)+' ('+cn+')');if(f<0)f=s}});return f>=0?{t:xs.join(' / '),c:sb(f)[2],i:sb(f)[3]}:{t:''}};
+  y=pTable({x,y,w,rh,fs,k,kt,cell});y+=3;y+=pLegend(x,y,w,ids,2,lsz);pSign(I,x+w,Math.min(y+1,bot2-sgH),Math.min(70,w))}
+ return{c,pw,ph}}
+function makePdf(jp,pw,ph){const enc=new TextEncoder(),parts=[],offs=[];let off=0;const push=b=>{const u=typeof b==='string'?enc.encode(b):b;parts.push(u);off+=u.length},n=jp.length,wP=(pw*72/25.4).toFixed(2),hP=(ph*72/25.4).toFixed(2);
+ const obj=(id,fn)=>{offs[id]=off;push(id+' 0 obj\n');fn();push('\nendobj\n')};
+ push('%PDF-1.4\n');obj(1,()=>push('<</Type/Catalog/Pages 2 0 R>>'));obj(2,()=>push('<</Type/Pages/Count '+n+'/Kids['+jp.map((_,i)=>(3+3*i)+' 0 R').join(' ')+']>>'));
+ jp.forEach((j,i)=>{const p=3+3*i,cs='q '+wP+' 0 0 '+hP+' 0 0 cm /Im0 Do Q';
+  obj(p,()=>push('<</Type/Page/Parent 2 0 R/MediaBox[0 0 '+wP+' '+hP+']/Resources<</XObject<</Im0 '+(p+2)+' 0 R>>>>/Contents '+(p+1)+' 0 R>>'));
+  obj(p+1,()=>push('<</Length '+cs.length+'>>\nstream\n'+cs+'\nendstream'));
+  obj(p+2,()=>{push('<</Type/XObject/Subtype/Image/Width '+j.w+'/Height '+j.h+'/ColorSpace/DeviceRGB/BitsPerComponent 8/Filter/DCTDecode/Length '+j.bytes.length+'>>\nstream\n');push(j.bytes);push('\nendstream')})});
+ const total=3+3*n,xo=off;let xr='xref\n0 '+total+'\n0000000000 65535 f \n';for(let i=1;i<total;i++)xr+=String(offs[i]).padStart(10,'0')+' 00000 n \n';
+ push(xr+'trailer\n<</Size '+total+'/Root 1 0 R/Info<</Title(Jadwal Pelajaran)>>>>\nstartxref\n'+xo+'\n%%EOF');return new Blob(parts,{type:'application/pdf'})}
+function pdfDlg(){let d=document.getElementById('pdfdlg');if(!d){d=document.createElement('div');d.id='pdfdlg';d.className='ov np';document.body.appendChild(d)}return d}
+function pdfClose(url){const d=document.getElementById('pdfdlg');if(d)d.remove();if(url)setTimeout(()=>URL.revokeObjectURL(url),120000)}
+function pdfMsg(t,sub,btn){const d=pdfDlg();d.innerHTML='<div class="md" role="dialog" aria-modal="true"><p><b>'+esc(t)+'</b>'+(sub?'<br><small>'+esc(sub)+'</small>':'')+'</p>'+(btn?'<div class="row"><button class="b p" id="pdx">Tutup</button></div>':'')+'</div>';const x=d.querySelector('#pdx');if(x)x.onclick=()=>pdfClose()}
+function pdfDone(blob,name,pages){const d=pdfDlg(),url=URL.createObjectURL(blob),file=new File([blob],name,{type:'application/pdf'});let can=false;try{can=!!(navigator.canShare&&navigator.canShare({files:[file]}))}catch(e){}
+ d.innerHTML='<div class="md" role="dialog" aria-modal="true"><p><b>PDF siap</b><br>'+pages+' halaman · '+Math.max(1,Math.round(blob.size/1024))+' KB<br><small>'+esc(name)+'</small></p><div class="row">'+(can?'<button class="b g" id="pds">Bagikan / Kirim</button>':'')+'<a class="b p" id="pdd" href="'+url+'" download="'+esc(name)+'" style="text-decoration:none">Unduh PDF</a><a class="b" href="'+url+'" target="_blank" rel="noopener" style="text-decoration:none">Buka</a><button class="b" id="pdx">Tutup</button></div><small>Untuk mencetak: buka PDF lalu cetak dari aplikasi PDF/Drive, atau bagikan ke aplikasi printer.</small></div>';
+ d.querySelector('#pdx').onclick=()=>pdfClose(url);const s=d.querySelector('#pds');if(s)s.onclick=async()=>{try{await navigator.share({files:[file],title:name})}catch(e){}}}
+async function exportPDF(kind,only){
+ if(!S||!S.sched){pdfMsg('Belum ada jadwal','Klik "Generate Jadwal Otomatis" di Dashboard terlebih dahulu.',1);return}
+ if(window.__pdfBusy)return;window.__pdfBusy=1;
+ try{const I=await loadAll();let list;
+  if(kind==='all')list=[0];else if(kind==='per')list=only>=0?[only]:S.classes.map((_,i)=>i);else list=only>=0?[only]:S.teachers.map((_,i)=>i);
+  const jp=[];let pw=0,ph=0;
+  for(let n=0;n<list.length;n++){pdfMsg('Membuat PDF… halaman '+(n+1)+' dari '+list.length,'Mohon tunggu, jangan tutup halaman.');await new Promise(r=>setTimeout(r,40));
+   const r=renderPage(kind,list[n],I);pw=r.pw;ph=r.ph;const blob=await new Promise(res=>r.c.toBlob(res,'image/jpeg',.92));if(!blob)throw new Error('Gagal membuat gambar halaman');
+   jp.push({bytes:new Uint8Array(await blob.arrayBuffer()),w:r.c.width,h:r.c.height});r.c.width=r.c.height=0}
+  const nm=(kind==='guru'?'Jadwal-Guru':kind==='all'?'Jadwal-Semua-Kelas':'Jadwal-Kelas'+(only>=0?'-'+S.classes[only]:''))+'-'+String(S.ta).replace(/[^0-9]+/g,'-')+'.pdf';
+  pdfDone(makePdf(jp,pw,ph),nm,jp.length)
+ }catch(e){console.error(e);pdfMsg('PDF gagal dibuat',String(e&&e.message||e),1)}finally{window.__pdfBusy=0}}
+window.exportPDF=exportPDF;
+function injectPdf(){const app=document.getElementById('app');if(!app||!authUser||!S)return;
+ app.querySelectorAll('[data-pdf]').forEach(x=>x.remove());
+ const mk=(l,fn)=>{const b=document.createElement('button');b.type='button';b.className='b g';b.dataset.pdf=1;b.textContent=l;b.onclick=fn;return b};
+ if(tab==='kelas'||tab==='guru'){
+  const pc=[...app.querySelectorAll(':scope>.card.np')].find(c=>/^Atur cetak/.test((c.querySelector('.row>b')||{}).textContent||''));
+  if(pc){const row=pc.querySelector('.row'),cb=[...row.querySelectorAll('button.b.p')].pop(),kind=tab==='guru'?'guru':(S.pr.mode==='all'?'all':'per'),docs=app.querySelectorAll('.docs>.doc');
+   row.insertBefore(mk('Simpan PDF'+(kind==='all'?'':' (semua)'),()=>exportPDF(kind,-1)),cb);
+   if(kind!=='all'&&docs.length>1&&MQ.matches&&mobSel[tab]>=0){const nm=tab==='kelas'?'Kelas '+S.classes[mobSel.kelas]:(S.teachers[mobSel.guru]||{}).n;row.insertBefore(mk('Simpan PDF: '+nm,()=>exportPDF(kind,mobSel[tab])),cb)}
+   const note=document.createElement('small');note.dataset.pdf=1;note.textContent='Tombol Cetak tidak berfungsi di HP/browser Anda? Gunakan Simpan PDF, lalu buka atau bagikan filenya.';pc.appendChild(note)}}
+ if(tab==='exp'){const card=[...app.querySelectorAll('.card')].find(c=>c.querySelector('h2')&&/^Ekspor/.test(c.querySelector('h2').textContent)),row=card&&card.querySelector('.row');
+  if(row){const first=row.firstChild;[['PDF Jadwal Kelas (1 halaman/kelas)','per'],['PDF Semua Kelas (1 lembar)','all'],['PDF Jadwal Guru','guru']].forEach(([l,k])=>row.insertBefore(mk(l,()=>exportPDF(k,-1)),first))}}}
+
 const R0=window.render;let lastTab=null,lastAuth=null;
 window.render=function(){const y=window.scrollY,keep=lastTab===tab&&lastAuth===!!authUser;R0();lastTab=tab;lastAuth=!!authUser;post();
  if(MQ.matches)window.scrollTo(0,keep?y:0)};

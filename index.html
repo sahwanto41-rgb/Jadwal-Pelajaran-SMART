@@ -1,4 +1,4 @@
-<!doctype html><html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><title>SMART — SDN Lanas 1</title>
+<!doctype html><html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><meta name="theme-color" content="#12306b"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="format-detection" content="telephone=no"><title>SMART — SDN Lanas 1</title>
 <style>
 :root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);--bg:#f4f6fb;--fg:#12203a;--card:#fff;--pri:#12306b;--on:#fff;--gold:#c9a227;--bd:#d5dae6;--bad:#b3261e;--ok:#1b7a3d;--wn:#8a6100}
 @media (prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#0e1424;--fg:#e8ecf6;--card:#172038;--pri:#2a4a95;--gold:#e0bb45;--bd:#2c3858;--bad:#ff8a80;--ok:#6fd49a;--wn:#f1c765}}
@@ -115,6 +115,113 @@ table.jt{min-width:0}
 small{font-size:8pt}
 }
 .lg{max-width:400px;margin:28px auto}.lg h2{margin:0 0 4px}.lg label{display:block;margin:10px 0 3px;font-weight:600}.lg input[type=text],.lg input[type=password]{width:100%;padding:9px 10px;font-size:15px}.lg .b{width:100%;margin-top:14px;padding:10px;font-weight:700}.lg .am{margin-top:10px;padding:8px 10px;border-radius:8px;border:1px solid var(--bad);color:var(--bad);font-weight:600}.lg .ai{margin-top:10px;padding:8px 10px;border-radius:8px;border:1px solid var(--ok);color:var(--ok);font-weight:600}.lg .sw{display:flex;gap:6px;align-items:center;margin-top:8px;font-weight:400}
+
+/* ===================== TAMPILAN HP / ANDROID ===================== */
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+body{overscroll-behavior-y:contain}
+button,.b,select,label.b{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+.ni{display:none}.nl .s{display:none}
+#toast,.mbar{display:none}
+@media (pointer:coarse){
+ .b{min-height:44px}.b.s{min-height:38px;padding:6px 14px}
+ input:not([type=checkbox]):not([type=radio]):not([type=file]),select{min-height:42px}
+ input[type=checkbox]{width:22px;height:22px;flex:none}
+}
+@media screen and (max-width:720px){
+ body{font-size:15px;padding-bottom:calc(76px + env(safe-area-inset-bottom,0px))}
+ body.islogin{padding-bottom:0}
+ input,select,textarea{font-size:16px}
+ /* header ringkas */
+ header.hd{padding:12px 14px}.hd-in{gap:12px}
+ .hd-logo{width:44px;height:44px;border-radius:12px}.hd-logo svg{width:26px;height:26px}
+ header.hd h1{font-size:22px;letter-spacing:.16em}
+ .hd-badge{display:none}.hd-sub{font-size:11px;margin:4px 0 6px}.hd-sub b{font-size:12px}
+ .hd-meta{gap:5px}.hd-chip{font-size:11px;padding:3px 9px}
+ /* menu bawah (mudah dijangkau ibu jari) */
+ nav#nav{position:fixed;left:0;right:0;bottom:0;z-index:40;display:flex;flex-wrap:nowrap;gap:2px;padding:6px 6px calc(6px + env(safe-area-inset-bottom,0px));background:var(--card);border-top:1px solid var(--bd);box-shadow:0 -4px 16px rgba(0,0,0,.14);overflow-x:auto;overflow-y:hidden;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+ nav#nav::-webkit-scrollbar{display:none}
+ nav#nav button{flex:0 0 76px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-height:54px;padding:6px 2px;border:0;border-radius:12px;background:transparent;color:var(--fg);font-size:11px;font-weight:600;opacity:.8}
+ nav#nav button.on{opacity:1;background:color-mix(in srgb,var(--gold) 26%,var(--card));box-shadow:inset 0 -3px 0 var(--gold)}
+ nav#nav button.nx{display:none}
+ nav#nav .ni{display:block;font-size:20px;line-height:1}
+ nav#nav .nl .f{display:none}nav#nav .nl .s{display:inline}
+ body.islogin nav#nav{display:none}
+ /* konten */
+ main{padding:0 10px 16px}
+ .card{padding:14px 12px;border-radius:14px;margin:10px 0}
+ h2{font-size:17px;margin-bottom:10px}
+ .tag{display:inline-block;max-width:100%;white-space:normal}
+ .row{gap:10px}
+ .row>.b{flex:1 1 calc(50% - 10px);min-height:48px;display:inline-flex;align-items:center;justify-content:center;text-align:center;font-weight:600}
+ .row>.b.p{flex-basis:100%}
+ .row.seg{display:grid;grid-template-columns:repeat(3,1fr)}
+ .row.seg>.b,.row.seg>.b.p{flex:none;min-height:44px}
+ .row>label:not(.b):not(:has(input[type=checkbox])){flex:1 1 130px;flex-direction:column;align-items:stretch;gap:4px;font-size:12px;font-weight:600}
+ .row>label:not(.b) input:not([type=checkbox]),.row>label:not(.b) select{width:100%;max-width:none}
+ .row>label:has(input[type=checkbox]){flex:1 1 100%;align-items:flex-start;gap:10px;padding:6px 0;line-height:1.35}
+ .f{display:grid;grid-template-columns:1fr;gap:10px}.f input,.f label,.f label input{width:100%}
+ .up{min-width:0;flex:1 1 100%}.thumb{max-width:100%}
+ input[type=file]{max-width:100%}
+ /* tabel isian -> kartu */
+ table.rt,table.rt tbody{display:block;width:100%}
+ table.rt tr.rt-h{display:none}
+ table.rt tr{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:12px;margin:0 0 10px;border:1px solid var(--bd);border-radius:12px;background:color-mix(in srgb,var(--pri) 5%,var(--card))}
+ table.rt td,table.rt th{display:block;border:0;padding:0;min-width:0;background:none}
+ table.rt td::before{content:attr(data-l);display:block;font-size:11px;font-weight:700;opacity:.75;margin-bottom:3px}
+ table.rt td input:not([type=checkbox]),table.rt td select{width:100%!important;max-width:none}
+ table.rt td{font-size:14px}
+ table.rt:not(.rt-subj):not(.rt3) td:first-child{grid-column:1/-1;font-weight:800;font-size:15px}
+ table.rt:not(.rt-subj):not(.rt3) td:first-child::before{display:none}
+ table.rt3 tr{grid-template-columns:repeat(3,1fr)}
+ table.rt3 th{grid-column:1/-1;font-weight:700}
+ table.rt3 td input{text-align:center}
+ table.rt-subj td:nth-child(2){order:0;grid-column:1/-1}table.rt-subj td:nth-child(2) input{font-weight:700}
+ table.rt-subj td:nth-child(1){order:1}table.rt-subj td:nth-child(3){order:2}
+ table.rt-subj td:nth-child(4){order:3;grid-column:1/-1}
+ table.rt-subj td:nth-child(5){order:4}table.rt-subj td:nth-child(6){order:5}
+ /* ringkasan (pasangan label-nilai) -> daftar */
+ table.kv{display:block}
+ table.kv tbody{display:grid;grid-template-columns:1fr auto;column-gap:12px}
+ table.kv tr{display:contents}
+ table.kv th,table.kv td{border:0;border-bottom:1px solid var(--bd);padding:9px 4px;background:none}
+ table.kv th{font-weight:600;text-align:left}
+ table.kv td{text-align:right;font-weight:800;font-size:16px}
+ /* jadwal */
+ .sc{-webkit-overflow-scrolling:touch}
+ table.jt{min-width:0}
+ body[data-day="-1"] table.jt,body[data-day="-1"] .allg table.jt{min-width:540px}
+ .jt col.cj{width:34px}.jt col.cw{width:74px}
+ .jt th,.jt td{padding:10px 3px}
+ .jt th.wk{font-size:11px}
+ .jt td.cd{font-size:14px;font-weight:700}
+ .jt td.cd select{font-size:13px;min-height:42px;padding:4px 2px}
+ .jt tr:not(.brk)>:nth-child(1){position:sticky;left:0;z-index:2}
+ .jt tr:not(.brk)>:nth-child(2){position:sticky;left:34px;z-index:2}
+ .allg{grid-template-columns:1fr}
+ .card.doc{padding:10px 8px}
+ .doc .dt .bn{padding:4px 14px;font-size:14px}.kop .sn{font-size:15px}
+ .bot{flex-direction:column;align-items:stretch}
+ .sign{justify-content:center}.sign>div{width:100%;max-width:280px}
+ .leg ul{columns:1}
+ .mhide{display:none!important}
+ /* bilah filter jadwal */
+ .mbar{display:block;position:sticky;top:env(safe-area-inset-top,0px);z-index:30;margin:0 -10px;padding:8px 10px 6px;background:color-mix(in srgb,var(--bg) 94%,transparent);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);border-bottom:1px solid var(--bd)}
+ .mbar .lbl{font-size:11px;font-weight:700;opacity:.7;margin:2px 0}
+ .mbar .chips{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding:2px 0 4px}
+ .mbar .chips::-webkit-scrollbar{display:none}
+ .mbar .chip2{flex:0 0 auto;min-width:44px;min-height:38px;padding:6px 14px;border-radius:99px;border:1px solid var(--bd);background:var(--card);color:var(--fg);font:inherit;font-weight:600}
+ .mbar .chip2.on{background:var(--pri);color:#fff;border-color:var(--pri)}
+ .mbar select{width:100%;margin-bottom:4px}
+ /* notifikasi */
+ #toast{display:block;position:fixed;left:10px;right:10px;bottom:calc(82px + env(safe-area-inset-bottom,0px));z-index:60;background:#12203a;color:#fff;border:1px solid var(--gold);border-radius:14px;padding:12px 38px 12px 14px;box-shadow:0 8px 24px rgba(0,0,0,.35);max-height:42vh;overflow:auto;font-size:14px;line-height:1.4;font-weight:600;transform:translateY(16px);opacity:0;pointer-events:none;transition:opacity .2s,transform .2s}
+ #toast.show{transform:none;opacity:1;pointer-events:auto}
+ #toast::after{content:"✕";position:absolute;right:12px;top:10px;opacity:.7}
+ /* dialog -> lembar bawah */
+ .ov{align-items:flex-end;padding:0}
+ .md{max-width:none;border-radius:18px 18px 0 0;padding:20px 16px calc(16px + env(safe-area-inset-bottom,0px))}
+ .md .row .b{flex:1 1 calc(50% - 10px);min-height:50px}
+ .lg{margin:16px auto}
+}
 </style><style id="pgs"></style></head><body>
 <header class="hd"><div class="hd-in"><div class="hd-logo" aria-hidden="true"><svg viewBox="0 0 36 36" fill="none"><rect x="3" y="5" width="30" height="27" rx="5" stroke="#fff" stroke-width="2.2"/><path d="M3 12h30" stroke="#fff" stroke-width="2.2"/><path d="M10 3v5M26 3v5" stroke="#fff" stroke-width="2.2" stroke-linecap="round"/><rect x="8" y="16" width="6" height="5" rx="1.4" fill="#fff" opacity=".85"/><rect x="15" y="16" width="6" height="5" rx="1.4" fill="#ffe08a"/><rect x="22" y="16" width="6" height="5" rx="1.4" fill="#fff" opacity=".85"/><rect x="8" y="23" width="6" height="5" rx="1.4" fill="#fff" opacity=".55"/><rect x="15" y="23" width="6" height="5" rx="1.4" fill="#fff" opacity=".85"/></svg></div><div class="hd-tx"><div class="hd-top"><h1>SMART</h1><span class="hd-badge">Jadwal Pelajaran Digital</span></div><p class="hd-sub"><b>S</b>istem <b>M</b>anajemen <b>A</b>lokasi, <b>R</b>uang, dan <b>T</b>ugas Pembelajaran Terintegrasi</p><div class="hd-meta"><span class="hd-chip">UPTD SPF SD Negeri Lanas 1</span><span class="hd-chip" id="hta">TA 2026/2027</span><span class="hd-chip" id="hsem">Semester Ganjil</span></div></div></div></header>
 <nav id="nav"></nav><main id="app"></main>
@@ -399,4 +506,66 @@ async function doLogin(e){e.preventDefault();const f=e.target.elements,u=f.u.val
  render()}
 authLoad();
 load();render();
+</script><script>
+/* ===== Penyempurnaan tampilan HP/Android (tidak mengubah logika jadwal) ===== */
+(function(){
+const MQ=window.matchMedia('(max-width:720px)'),COARSE=window.matchMedia('(pointer:coarse)');
+const NI={'Dashboard':['🏠','Beranda'],'Data & Alokasi JP':['📝','Data'],'Jadwal Kelas':['🏫','Kelas'],'Jadwal Guru':['👩‍🏫','Guru'],'Pemeriksaan & Beban':['✅','Cek'],'Ekspor / Cadangan':['💾','Ekspor'],'Akun':['👤','Akun']};
+let mobDay=(()=>{const g=new Date().getDay();return g===0?0:Math.min(g-1,DAYS.length-1)})(),mobSel={kelas:0,guru:0},tt,firstLogin=true;
+function decorateNav(){const nav=document.getElementById('nav');if(!nav)return;
+ nav.querySelectorAll('button').forEach(b=>{if(b.dataset.dec)return;const t=b.textContent.trim(),m=NI[t];
+  if(t==='Keluar')b.classList.add('nx');
+  if(m){b.dataset.dec=1;b.setAttribute('aria-label',t);b.innerHTML='<span class="ni" aria-hidden="true">'+m[0]+'</span><span class="nl"><span class="f">'+esc(t)+'</span><span class="s">'+m[1]+'</span></span>'}});
+ if(MQ.matches){const on=nav.querySelector('button.on');if(on)nav.scrollLeft=on.offsetLeft-(nav.clientWidth-on.offsetWidth)/2}}
+function respTables(){document.querySelectorAll('#app table:not(.jt)').forEach(t=>{
+ const rows=[...t.querySelectorAll('tr')];if(!rows.length)return;const ch=r=>[...r.children],r0=ch(rows[0]);
+ if(r0.length>1&&r0.every(c=>c.tagName==='TH')&&rows.length>1){
+  const heads=r0.map(c=>c.textContent.trim()),body=rows.slice(1);
+  const allTd=body.every(r=>ch(r).every(c=>c.tagName==='TD')),rowTh=body.every(r=>ch(r)[0].tagName==='TH'&&ch(r).slice(1).every(c=>c.tagName==='TD'));
+  if(allTd||rowTh){t.classList.add('rt');if(rowTh&&!allTd)t.classList.add('rt3');if(heads[0]==='Kode')t.classList.add('rt-subj');rows[0].classList.add('rt-h');
+   body.forEach(r=>ch(r).forEach((c,i)=>{if(c.tagName==='TD')c.dataset.l=heads[i]||''}));return}}
+ if(rows.every(r=>{const c=ch(r);return c.length%2===0&&c.every((x,i)=>x.tagName===(i%2?'TD':'TH'))}))t.classList.add('kv')});
+ document.querySelectorAll('#app .row').forEach(r=>{const k=[...r.children];if(k.length>=4&&k.every(x=>x.tagName==='BUTTON'&&/^Kelas [IVX]+$/.test(x.textContent.trim())))r.classList.add('seg')})}
+function showToast(t){let e=document.getElementById('toast');if(!e){e=document.createElement('div');e.id='toast';e.className='np';e.setAttribute('role','status');e.setAttribute('aria-live','polite');e.onclick=()=>e.classList.remove('show');document.body.appendChild(e)}
+ e.textContent=t;e.scrollTop=0;e.classList.add('show');clearTimeout(tt);tt=setTimeout(()=>e.classList.remove('show'),Math.min(15000,4000+t.length*60))}
+function toastFromMsg(){if(!MQ.matches)return;const c=document.getElementById('app').firstElementChild;
+ if(!c||!c.classList.contains('card')||!c.classList.contains('np')||c.classList.contains('warn')||c.children.length!==1||c.firstElementChild.tagName!=='B')return;
+ const t=c.textContent.trim();c.remove();if(t)showToast(t)}
+function fixSpans(d){document.querySelectorAll('.jt tr.lit>td[colspan],.jt tr.brk>td[colspan]').forEach(td=>{if(!td.dataset.cs)td.dataset.cs=td.getAttribute('colspan');const lit=td.parentElement.classList.contains('lit');td.setAttribute('colspan',d>=0?(lit?1:3):td.dataset.cs)})}
+function applyDay(){const d=MQ.matches?mobDay:-1;document.body.dataset.day=d;
+ let st=document.getElementById('daycss');if(!st){st=document.createElement('style');st.id='daycss';document.head.appendChild(st)}
+ let css='';if(d>=0)for(let i=0;i<DAYS.length;i++)if(i!==d){const n=i+3;css+='.jt tr:not(.lit):not(.brk)>:nth-child('+n+'),.jt col:nth-child('+n+'){display:none}'}
+ st.textContent=css?'@media screen and (max-width:720px){'+css+'}':'';fixSpans(d)}
+function applySel(){const docs=[...document.querySelectorAll('#app .docs>.doc')],v=mobSel[tab];docs.forEach((x,i)=>x.classList.toggle('mhide',docs.length>1&&v>=0&&i!==v))}
+function scheduleBar(){document.querySelectorAll('.mbar').forEach(x=>x.remove());
+ if(!MQ.matches||!authUser||!S||!S.sched||(tab!=='kelas'&&tab!=='guru'))return;
+ const app=document.getElementById('app'),docs=[...app.querySelectorAll('.docs>.doc')];if(!docs.length)return;
+ if(mobSel[tab]>=docs.length)mobSel[tab]=0;
+ const bar=document.createElement('div');bar.className='mbar np';let h='';
+ if(docs.length>1){
+  if(tab==='kelas')h+='<div class="lbl">Kelas</div><div class="chips" data-k="sel">'+[['-1','Semua']].concat(S.classes.map((c,i)=>[String(i),c])).map(([v,l])=>'<button type="button" class="chip2 '+(+v===mobSel.kelas?'on':'')+'" data-v="'+v+'">'+esc(l)+'</button>').join('')+'</div>';
+  else h+='<div class="lbl">Guru</div><select data-k="selg" aria-label="Pilih guru"><option value="-1"'+(mobSel.guru<0?' selected':'')+'>Semua guru</option>'+S.teachers.map((t,i)=>'<option value="'+i+'"'+(i===mobSel.guru?' selected':'')+'>'+esc(t.n)+'</option>').join('')+'</select>'}
+ h+='<div class="lbl">Hari</div><div class="chips" data-k="day">'+[['-1','Semua']].concat(DAYS.map((d,i)=>[String(i),d])).map(([v,l])=>'<button type="button" class="chip2 '+(+v===mobDay?'on':'')+'" data-v="'+v+'">'+esc(l)+'</button>').join('')+'</div>';
+ bar.innerHTML=h;
+ bar.addEventListener('click',e=>{const b=e.target.closest('.chip2');if(!b)return;const k=b.parentElement.dataset.k,v=+b.dataset.v;
+  if(k==='day')mobDay=v;else mobSel[tab]=v;
+  b.parentElement.querySelectorAll('.chip2').forEach(x=>x.classList.toggle('on',x===b));applyDay();applySel();window.scrollTo(0,Math.max(0,bar.offsetTop-4))});
+ bar.addEventListener('change',e=>{if(e.target.dataset.k==='selg'){mobSel.guru=+e.target.value;applySel()}});
+ app.prepend(bar);
+ const pb=[...app.querySelectorAll(':scope>.card.np')].find(c=>/^Atur cetak/.test((c.querySelector('.row>b')||{}).textContent||''));if(pb)app.appendChild(pb);
+ applySel()}
+function post(){try{
+ document.body.classList.toggle('islogin',!authUser);
+ decorateNav();respTables();toastFromMsg();scheduleBar();applyDay();
+ if(!authUser&&firstLogin&&COARSE.matches)setTimeout(()=>{const a=document.activeElement;if(a&&a.id==='lu')a.blur()},60);
+ if(authUser)firstLogin=false;
+}catch(e){console.error('mobile',e)}}
+const R0=window.render;let lastTab=null,lastAuth=null;
+window.render=function(){const y=window.scrollY,keep=lastTab===tab&&lastAuth===!!authUser;R0();lastTab=tab;lastAuth=!!authUser;post();
+ if(MQ.matches)window.scrollTo(0,keep?y:0)};
+const P0=window.doPrint;window.doPrint=function(){fixSpans(-1);return P0.apply(this,arguments)};
+window.addEventListener('beforeprint',()=>fixSpans(-1));window.addEventListener('afterprint',()=>applyDay());
+(MQ.addEventListener?MQ.addEventListener('change',()=>window.render()):MQ.addListener(()=>window.render()));
+window.render();
+})();
 </script></body></html>

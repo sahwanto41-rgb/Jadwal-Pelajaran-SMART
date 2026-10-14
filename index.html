@@ -1,0 +1,326 @@
+<!doctype html><html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><title>SMART — SDN Lanas 1</title>
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);--bg:#f4f6fb;--fg:#12203a;--card:#fff;--pri:#12306b;--on:#fff;--gold:#c9a227;--bd:#d5dae6;--bad:#b3261e;--ok:#1b7a3d;--wn:#8a6100}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#0e1424;--fg:#e8ecf6;--card:#172038;--pri:#2a4a95;--gold:#e0bb45;--bd:#2c3858;--bad:#ff8a80;--ok:#6fd49a;--wn:#f1c765}}
+:root[data-theme=dark]{--bg:#0e1424;--fg:#e8ecf6;--card:#172038;--pri:#2a4a95;--gold:#e0bb45;--bd:#2c3858;--bad:#ff8a80;--ok:#6fd49a;--wn:#f1c765}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:14px/1.45 system-ui,Segoe UI,sans-serif}
+header{background:var(--pri);color:#fff;padding:12px 16px;border-bottom:4px solid var(--gold)}header h1{margin:0;font-size:18px}header small{opacity:.85}
+nav{display:flex;gap:4px;flex-wrap:wrap;padding:8px 12px}nav button,.b{border:1px solid var(--bd);background:var(--card);color:var(--fg);padding:7px 12px;border-radius:8px;cursor:pointer;font:inherit}
+nav button.on,.b.p{background:var(--pri);color:#fff;border-color:var(--pri)}.b.g{background:var(--gold);color:#222;border-color:var(--gold)}.b.d{background:var(--bad);color:#fff;border-color:var(--bad)}.b.s{padding:3px 9px;font-size:12px}
+.b:disabled{opacity:.5;cursor:not-allowed}
+main{padding:0 12px 24px;max-width:1180px;margin:auto}.card{background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:12px;margin:10px 0}
+.card.warn{border-color:var(--wn);border-left-width:6px}
+h2{font-size:15px;margin:0 0 8px}.sc{overflow-x:auto}table{border-collapse:collapse;width:100%}th,td{border:1px solid var(--bd);padding:4px 6px;text-align:left;vertical-align:middle}th{background:color-mix(in srgb,var(--pri) 12%,var(--card))}
+input,select{font:inherit;color:var(--fg);background:var(--card);border:1px solid var(--bd);border-radius:6px;padding:4px}input[type=number]{width:56px}
+:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.bad{background:color-mix(in srgb,var(--bad) 22%,var(--card))}.tag{display:inline-block;padding:2px 8px;border-radius:99px;font-weight:700;border:1px solid currentColor}
+.ok{color:var(--ok)}.er{color:var(--bad)}.wn{color:var(--wn)}.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.row label{display:flex;gap:4px;align-items:center}
+.pc{display:none}.leg{font-size:12px;margin-top:8px}.leg ul{columns:2;margin:4px 0;padding-left:16px}.f{display:flex;gap:8px;flex-wrap:wrap}.f label{display:flex;flex-direction:column;font-size:12px}.f input{width:210px}
+small{color:inherit;opacity:.8}
+/* tabel jadwal: kolom JP dan Waktu terpisah, lebar tetap agar rapi */
+table.jt{table-layout:fixed;width:100%;min-width:640px}
+.jt col.cj{width:6%}.jt col.cw{width:15%}
+.jt th,.jt td{padding:8px 4px;text-align:center;vertical-align:middle;line-height:1.3;overflow-wrap:anywhere}
+.jt th.jp{font-weight:700}.jt th.wk{font-weight:500;font-size:12px;white-space:nowrap}
+.jt td.x{opacity:.35}
+.jt td.cd{font-weight:600}.jt td.cd select{width:100%;max-width:none;padding:3px 1px;font-size:12px}
+.jt tr.lit td,.jt tr.lit th{background:color-mix(in srgb,var(--pri) 14%,var(--card));font-weight:600;font-size:12px;padding:4px;text-align:center}
+.jt tr.brk td{text-align:center;background:color-mix(in srgb,var(--gold) 25%,var(--card));font-weight:600;font-size:12px;padding:4px}
+.allg{display:grid;grid-template-columns:repeat(auto-fit,minmax(400px,1fr));gap:14px}
+.allg .jt{min-width:0}.mini .mt{font-weight:700;text-align:center;margin:0 0 3px}
+.bot{display:flex;gap:16px;justify-content:space-between;align-items:flex-end}.bot .leg{flex:1}.bot .sign{margin-top:0}
+.kop{display:flex;align-items:center;gap:12px;text-align:center;border-bottom:4px double var(--fg);padding-bottom:6px;margin-bottom:10px}
+.kop .kt{flex:1;line-height:1.25}.kop .sn{font-size:17px;font-weight:700}.kop .al{font-size:12px}.kop img.lg{height:calc(var(--kh,26mm) - 4mm);max-width:calc(var(--kh,26mm)*1.4);object-fit:contain}
+.kopimg{margin-bottom:10px;border-bottom:3px double var(--fg);padding-bottom:4px;text-align:center}.kopimg img{width:min(100%,var(--kw,100%));height:auto;display:block;margin:0 auto;background:#fff}
+.dt{text-align:center;font-weight:700;margin:6px 0 10px;font-size:15px}
+.doc h2{text-align:center}
+.sign{margin-top:14px;display:flex;justify-content:flex-end}.sign>div{width:75mm;max-width:100%;text-align:center}
+.sign .sp{position:relative;height:24mm}.sign .ttd{position:absolute;left:50%;top:0;height:22mm;transform:translateX(-50%)}.sign .stp{position:absolute;left:10%;top:-1mm;height:24mm;opacity:.85;mix-blend-mode:multiply}
+.thumb{max-height:60px;max-width:220px;background:#fff;border:1px solid var(--bd);display:block;margin:4px 0}
+.up{display:flex;flex-direction:column;gap:2px;font-size:12px;min-width:230px}
+.ov{position:fixed;inset:0;background:#0009;display:flex;align-items:center;justify-content:center;z-index:50;padding:14px}
+.md{background:var(--card);color:var(--fg);border-radius:10px;padding:18px;max-width:480px;width:100%}.md p{margin:0 0 14px}
+@media (max-width:640px){.jt{font-size:12px}}
+/* ===== Dokumen berwarna ceria untuk SD ===== */
+.card.doc{--k:#f0508a;--kl:#fff0f5;--kt:#fff;--rb:linear-gradient(90deg,#ff6b8b,#ffa94d,#ffd43b,#51cf66,#4dabf7,#b197fc);position:relative;background-color:#fffdf8!important;color:#2b2540!important;font-family:"Nunito","Quicksand","Trebuchet MS","Segoe UI",system-ui,sans-serif;border:0;border-radius:14px;padding:4mm 5mm;background-image:radial-gradient(var(--kl) 1.1px,transparent 1.4px);background-size:4.5mm 4.5mm}
+.card.doc{box-sizing:border-box;width:min(100%,var(--W,100%));margin-left:auto;margin-right:auto}
+.card.doc::before{content:"";position:absolute;inset:1.2mm;border:.7mm dashed var(--k);border-radius:4mm;pointer-events:none}
+.doc .kop,.doc .kopimg{border-bottom:1.2mm solid transparent;border-image:var(--rb) 1;padding-bottom:2mm}
+.doc .kop .sn{color:#1f2a6b}
+.doc .dt{text-align:center;margin:2mm 0 3mm;line-height:1.35}
+.doc .dt .bn{display:inline-block;background:var(--k);color:var(--kt);padding:1.2mm 7mm;border-radius:99px;font-weight:900;letter-spacing:.4px;box-shadow:0 .8mm 0 color-mix(in srgb,var(--k) 55%,#000)}
+.doc .dt .ta{display:block;margin-top:1.8mm;font-weight:800;color:#5f3dc4;font-size:.82em}
+.doc h2{color:color-mix(in srgb,var(--k) 75%,#000)}
+.doc table.jt{border-collapse:separate;border-spacing:.7mm}
+.doc .jt th,.doc .jt td{border:0;border-radius:1.6mm;color:#2b2540}
+.doc .jt thead th{font-weight:800}
+.doc .jt thead th:nth-child(-n+2){background:var(--k);color:var(--kt)}
+.doc .jt thead th:nth-child(3){background:#ffb3c6}.doc .jt thead th:nth-child(4){background:#ffcf9e}.doc .jt thead th:nth-child(5){background:#ffe58a}
+.doc .jt thead th:nth-child(6){background:#a9e9bf}.doc .jt thead th:nth-child(7){background:#a5d8ff}.doc .jt thead th:nth-child(8){background:#d0bfff}
+.doc .jt th.jp,.doc .jt th.wk{background:color-mix(in srgb,var(--k) 28%,#fff)}
+.doc .jt td.cd{background:#fff;border:.3mm dashed #ced4da}
+.doc .jt td.cl{background:var(--c);color:var(--i);font-weight:800;border:0;border-bottom:.5mm solid var(--i)}
+.doc .jt td.x{background:repeating-linear-gradient(135deg,#f1f3f5 0 1.2mm,#fff 1.2mm 2.4mm);color:transparent;opacity:1;border:0}
+.doc .jt tr.lit td,.doc .jt tr.lit th{background:#d0ebff;color:#1864ab;font-weight:800}
+.doc .jt tr.brk td{background:repeating-linear-gradient(135deg,#fff3bf 0 2mm,#ffe69c 2mm 4mm);color:#8a5a00;font-weight:800;letter-spacing:.3px}
+.doc select{color:#2b2540;background:#fff}
+.doc .leg{font-weight:600}.doc .leg>b{color:#5f3dc4}
+.doc .leg ul{list-style:none;padding:0}.doc .leg li{margin:.6mm 0;break-inside:avoid}
+.chip{display:inline-block;min-width:14mm;text-align:center;padding:0 1.8mm;border-radius:99px;background:var(--c);color:var(--i);font-weight:800;border:.3mm solid var(--i)}
+.doc .mini .mt{background:var(--k);color:var(--kt);border-radius:99px;padding:.4mm 0;font-weight:900}
+.doc .ft{text-align:center;margin-top:2.5mm;font-weight:800;color:#5f3dc4;font-size:.85em}
+@media print{
+*{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+header,nav,.np,.b,.ov{display:none!important}
+.pc{display:inline}
+body{background:#fff!important;font-size:11pt}
+main{max-width:none;padding:0}
+.card{border:0;margin:0}.card:not(.doc){padding:0;background:#fff!important;color:#000!important}
+.card.doc{border-radius:0;margin:0}
+.docs>.doc{break-after:page;break-inside:avoid;max-height:var(--H);overflow:hidden}
+.docs>.doc:last-child{break-after:auto}
+.sc{overflow:visible}
+table.jt{min-width:0}
+.jt th,.jt td{height:calc(var(--rh,10mm) - .7mm);padding:0 .8mm;font-size:var(--fs,10pt);line-height:1.15}
+.jt th.wk{font-size:calc(var(--fs,10pt)*.86)}
+.jt tr.brk td{height:calc(var(--rh,10mm)*.7 - .7mm);font-size:calc(var(--fs,10pt)*.8);padding:0}
+.jt tr.lit td,.jt tr.lit th{height:calc(var(--rh,10mm)*.7 - .7mm);font-size:calc(var(--fs,10pt)*.85);padding:0}
+.doc td.bad{background:var(--c,#fff)!important}.er{display:none}
+.allg{grid-template-columns:repeat(var(--gc,3),1fr);gap:3mm 4mm}
+.mini .mt{font-size:calc(var(--fs,10pt)*1.15);margin-bottom:1mm}
+.kop .kt{font-size:calc(11pt*var(--ks,1))}.kop .sn{font-size:calc(15pt*var(--ks,1))}.kop .al{font-size:calc(9pt*var(--ks,1))}.kopimg{margin-bottom:3mm}.kopimg img{max-width:100%}.kop{margin-bottom:3mm}.docs>.doc{width:var(--W);margin:0}
+.dt{font-size:12pt}.doc h2{font-size:12pt;margin:0 0 3mm}
+.all .dt{margin:1.5mm 0 2.5mm}
+.leg{font-size:9.5pt}.all .leg{font-size:calc(var(--fs,8pt)*1.05)}.all .leg ul{columns:4;margin:1mm 0}
+.sign{margin-top:4mm}.bot .sign{margin-top:0}
+.sign>div{width:70mm}
+small{font-size:8pt}
+}
+</style><style id="pgs"></style></head><body>
+<header><h1>SMART</h1><small>Sistem Manajemen Alokasi, Ruang, dan Tugas Pembelajaran Terintegrasi — UPTD SPF SD Negeri Lanas 1 · TA 2026/2027</small></header>
+<nav id="nav"></nav><main id="app"></main>
+<script>
+const $=s=>document.querySelector(s),esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const DAYS=['Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'],TABS=[['dash','Dashboard'],['data','Data & Alokasi JP'],['kelas','Jadwal Kelas'],['guru','Jadwal Guru'],['cek','Pemeriksaan & Beban'],['exp','Ekspor / Cadangan']];
+let S,tab='dash',selC=0,msg='',editMode=false;
+function demoJP(){const jpd=[3,4,[7,8,6,6,6,6],[4,5,5,5,5,5],[0,0,5,5,5,5],3,3,[0,0,2,2,2,2],1,1,[0,0,0,0,2,2],[6,6,7,7,7,7]],jp={};jpd.forEach((v,s)=>{for(let c=0;c<6;c++)jp[c+'_'+s]=Array.isArray(v)?v[c]:v});return jp}
+function def(){const subj=['Pendidikan Agama & Budi Pekerti','Pendidikan Pancasila','Bahasa Indonesia','Matematika','IPAS','PJOK','Seni dan Budaya','Bahasa Inggris','Muatan Lokal Bahasa Madura','Muatan Lokal BTQ','Koding dan Kecerdasan Artifisial (pilihan)','Kokurikuler (Projek)'],jp={},asg={};
+subj.forEach((_,s)=>{for(let c=0;c<6;c++){jp[c+'_'+s]=0;asg[c+'_'+s]=(s==0||s==9)?6:s==5?7:c}});
+return{teachers:['Muhammad Rifa’i, S.Pd.I','Anik Nurwidiastutik, S.Pd.','Wiwin Damayanti, S.Pd.SD.','Evi Susilowati, S.Pd.','Ratna Kartika Sari, S.Pd.','Arniwatiningsih, S.Pd.','Azise, S.Pd.I','Mahfud Efendi, S.Pd.'].map(n=>({n})),
+subjects:subj,classes:['I','II','III','IV','V','VI'],slots:[8,8,8,8,5,5],jpMin:35,start:'07:00',brk1:3,brk1Min:15,brk2:5,brk2Min:15,codes:['PAIPB','PP','BIND','MTK','IPAS','PJOK','SBD','BING','BMAD','BTQ','KKA','KOKUR'],blk:[1,0,0,0,0,1,0,0,0,0,0,0],litOn:1,litMin:15,maxRun:3,pjokMode:'desc',cmax:[6,7,0,0,0,0],win:[0,0,0,3,3,3,0,0,0,0,0,0],maxSubj:5,ver:8,slk:[0,0,0,0,0,0],
+kop:{i1:'PEMERINTAH KABUPATEN BONDOWOSO',i2:'',sk:'UPTD SPF SD NEGERI LANAS 1',al:'Jl. Guce, Desa Lanas, Kecamatan Botolinggo, Kabupaten Bondowoso, Jawa Timur',kota:'Lanas',tgl:'',jab:'Kepala Sekolah,',kepsek:'Sahwanto, S.Pd.',nip:'198111142008011012',showSign:true,logo:'',img:'',imgW:1,imgH:.2,ttd:'',stp:''},
+pr:{size:'A4',ori:'portrait',mode:'per',m:10},
+jp,asg,sched:null,locked:false,verified:false,demo:false,log:[]}}
+
+function okData(o){try{
+if(!o||typeof o!=='object')return'Bukan objek data.';
+const T=o.teachers,Sb=o.subjects;
+if(!Array.isArray(T)||!T.length||T.some(t=>!t||typeof t.n!=='string'))return'Daftar guru tidak valid.';
+if(!Array.isArray(Sb)||!Sb.length||Sb.some(x=>typeof x!=='string'))return'Daftar mata pelajaran tidak valid.';
+if(!Array.isArray(o.classes)||o.classes.length!==6)return'Rombel harus berjumlah 6 kelas.';
+if(!Array.isArray(o.slots)||o.slots.length!==6||o.slots.some(x=>!Number.isInteger(+x)||+x<0||+x>12))return'Jumlah JP per hari tidak valid.';
+if(!o.jp||typeof o.jp!=='object'||!o.asg||typeof o.asg!=='object')return'Data JP atau penugasan guru tidak ada.';
+for(const k in o.asg){const v=o.asg[k];if(v!==''&&v!==undefined&&!(Number.isInteger(+v)&&+v>=0&&+v<T.length))return'Penugasan merujuk guru yang tidak ada ('+k+').'}
+if(o.sched){if(!Array.isArray(o.sched)||o.sched.length!==6)return'Jadwal tidak valid.';
+for(let c=0;c<6;c++)for(let d=0;d<6;d++){const r=o.sched[c]&&o.sched[c][d];if(!Array.isArray(r)||r.length!==+o.slots[d])return'Ukuran jadwal tidak sesuai jumlah JP per hari.';if(r.some(s=>!Number.isInteger(s)||s<-1||s>=Sb.length))return'Jadwal merujuk mata pelajaran yang tidak ada.'}}
+return null}catch(e){return'Struktur data tidak dapat dibaca.'}}
+function normSched(o){try{if(o&&Array.isArray(o.sched)&&Array.isArray(o.slots)&&o.sched.length===6&&o.sched.every(c=>Array.isArray(c)&&c.length===6))o.sched=o.sched.map(c=>c.map((r,d)=>Array.from({length:+o.slots[d]||0},(_,i)=>Array.isArray(r)&&Number.isInteger(r[i])&&r[i]>=0?r[i]:-1)))}catch(e){}}
+function load(){let raw=null;try{raw=localStorage.getItem('lss4')||localStorage.getItem('lss3')}catch(e){}
+if(raw){try{const o=JSON.parse(raw);normSched(o);const er=okData(o);if(er)throw new Error(er);S=o}catch(e){try{localStorage.setItem('lss4_rusak',raw)}catch(x){}S=null;msg='Data tersimpan tidak valid ('+e.message+'). Salinannya disimpan pada kunci "lss4_rusak"; aplikasi dimulai dari data awal.'}}
+if(!S)S=def();fix()}
+function fix(){const oldVer=S.ver,had=S.demo!==undefined,hadWin=Array.isArray(S.win),hadCm=Array.isArray(S.cmax),d=def();for(const k in d)if(S[k]===undefined)S[k]=d[k];
+S.kop={...d.kop,...S.kop};S.pr={...d.pr,...S.pr};const K=S.kop,ph=v=>typeof v!=='string'||!v||/\.{4,}/.test(v)||/^Nama Kepala Sekolah/.test(v)||/^Alamat sekolah,/.test(v);
+['i1','al','kepsek','nip','sk'].forEach(k=>{if(ph(K[k]))K[k]=d.kop[k]});
+['i2','kota','tgl','jab'].forEach(k=>{if(typeof K[k]!=='string')K[k]=d.kop[k]});
+['img','logo','ttd','stp'].forEach(k=>{if(typeof K[k]!=='string'||!/^data:image\/(png|jpe?g|webp);base64,/.test(K[k]))K[k]=''});
+K.imgW=+K.imgW||1;K.imgH=+K.imgH||.2;K.showSign=K.showSign!==false;
+if(!['A4','F4','Letter'].includes(S.pr.size))S.pr.size='A4';if(!['portrait','landscape'].includes(S.pr.ori))S.pr.ori='portrait';if(!['per','all'].includes(S.pr.mode))S.pr.mode='per';S.pr.m=10;
+if(!had){const dj=demoJP(),ks=Object.keys(dj);S.demo=ks.length===Object.keys(S.jp).length&&ks.every(k=>+S.jp[k]===dj[k])}
+if(!hadWin)S.win=S.subjects.map(x=>/^PJOK/i.test(x)?3:0);S.win=S.subjects.map((_,i)=>Math.max(0,Math.min(12,Math.floor(+S.win[i])||0)));S.maxRun=Math.max(1,Math.min(6,Math.floor(+S.maxRun)||3));if(!['desc','asc','free'].includes(S.pjokMode))S.pjokMode='desc';S.cmax=S.classes.map((_,i)=>Math.max(0,Math.min(12,Math.floor(+S.cmax[i])||0)));if(!hadCm&&S.sched)msg='Aturan baru (hari PJOK per kelas, batas JP kelas I–II, kokurikuler 2 JP) berlaku — Generate ulang jadwal.';S.litOn=S.litOn?1:0;S.litMin=Math.max(0,Math.min(60,Math.floor(+S.litMin)||0));if(!hadWin&&S.sched)msg='Aturan baru (PJOK di JP 1–3, literasi pagi 15 menit) berlaku — Generate ulang jadwal.';
+S.maxSubj=Math.max(0,Math.min(12,Math.floor(+S.maxSubj)||0));if(!Array.isArray(S.slk)||S.slk.length!=6)S.slk=[0,0,0,0,0,0];if(!(oldVer>=2)){S.cmax[0]=6;const pa=S.subjects.findIndex(x=>/^Pendidikan Agama/i.test(x));if(pa>=0)S.win[pa]=0;if(S.sched)msg='Aturan baru (PAIPB bebas di JP berapa pun, maks 5 mapel per hari, Kelas I maks JP 6) berlaku — Generate ulang jadwal.'}if(!(oldVer>=4)){const ns=[...S.slots];ns[4]=5;ns[5]=5;if(ns.some((v,i)=>v!=S.slots[i])){S.slots=ns;if(S.sched){S.sched=null;S.locked=false}msg='Jam belajar diatur: Jumat dan Sabtu sampai JP 5 — Generate ulang jadwal.'}}if(!(oldVer>=5)){const pa=S.subjects.findIndex((x,i)=>/^Pendidikan Agama/i.test(x)||S.codes[i]=='PAIPB');if(pa>=0&&S.win[pa]){S.win[pa]=0;if(S.sched)msg='Aturan PAIPB diubah: tidak lagi dibatasi JP 1–3 — Generate ulang jadwal.'}}if(!(oldVer>=6)&&S.sched)msg='Aturan baru PAIPB (satu kelas per hari, tanpa celah hari Senin–Sabtu) berlaku — Generate ulang jadwal.';if(!(oldVer>=7)){const bi=S.subjects.findIndex((x,i)=>S.codes[i]=='BTQ'||/BTQ/i.test(x)),ai=S.teachers.findIndex(t=>/^Azise/i.test(t.n));if(bi>=0&&ai>=0){let ch=false;S.classes.forEach((_,c)=>{if(S.asg[c+'_'+bi]!==ai&&+S.asg[c+'_'+bi]!==ai){S.asg[c+'_'+bi]=ai;ch=true}});if(ch&&S.sched){S.sched=null;S.locked=false;msg='Perbaikan: BTQ kini diampu Azise, S.Pd.I (sama dengan PAIPB) sehingga tidak boleh bentrok — Generate ulang jadwal.'}}}if(!(oldVer>=8)){let ch=false;S.subjects.forEach((x,i)=>{if((/^Matematika/i.test(x)||/^IPAS/i.test(x)||S.codes[i]=='MTK'||S.codes[i]=='IPAS')&&!S.win[i]){S.win[i]=3;ch=true}});if(ch&&S.sched){S.sched=null;S.locked=false;msg='Aturan baru: Matematika dan IPAS (mapel penalaran) ditempatkan di JP 1–3 seperti PJOK — Generate ulang jadwal.'}}S.ver=8;S.teachers=S.teachers.map(t=>({n:t.n}));S.subjects.forEach((_,i)=>{if(!S.codes[i])S.codes[i]='MP'+(i+1);if(S.blk[i]===undefined)S.blk[i]=0});if(S.brk!==undefined){delete S.brk;delete S.brkMin;S.sched=null;S.locked=false}}
+function save(){try{localStorage.setItem('lss4',JSON.stringify(S));return true}catch(e){msg='Peringatan: penyimpanan di browser gagal (mungkin gambar terlalu besar). Data hanya ada di halaman ini — unduh cadangan JSON.';return false}}
+
+function logc(t){S.log.push(new Date().toLocaleString('id-ID')+' — '+t);S.log=S.log.slice(-100)}
+const pm=p=>{const[h,m]=S.start.split(':').map(Number);return h*60+m+(S.litOn?S.litMin:0)+p*S.jpMin+(S.brk1>0&&p>=S.brk1?S.brk1Min:0)+(S.brk2>0&&p>=S.brk2?S.brk2Min:0)},hm=t=>String(Math.floor(t/60)).padStart(2,'0')+'.'+String(t%60).padStart(2,'0'),tm=p=>hm(pm(p)),te=p=>hm(pm(p)+S.jpMin);
+const isKK=s=>/^Kokurikuler/i.test(S.subjects[s]||''),cd=s=>S.codes[s]||'?',seg=p=>(S.brk1>0&&p>=S.brk1?1:0)+(S.brk2>0&&p>=S.brk2?1:0);
+const tn=t=>S.teachers[t]?S.teachers[t].n:'-';
+// ---- validasi
+function validate(){const R={err:[],cell:{},tl:S.teachers.map(()=>({tgt:0,act:0,days:0,gap:0}))};
+S.classes.forEach((_,c)=>S.subjects.forEach((_,s)=>{const t=S.asg[c+'_'+s],n=+S.jp[c+'_'+s]||0;if(n>0){if(t===undefined||t==='')R.err.push(`Kelas ${S.classes[c]} – ${S.subjects[s]}: belum ada guru pengampu`);else R.tl[t].tgt+=n}}));
+if(!S.sched)return R;
+const MXV=Math.max(1,Math.min(+S.maxRun||3,maxSegLen()||1));
+S.classes.forEach((cn,c)=>{const cnt={},pos={};DAYS.forEach((dn,d)=>{let kk=0;for(let p=0;p<S.slots[d];p++){const s=S.sched[c][d][p];if(s>=0){if(p>=es(c,d)){R.err.push(`Kelas ${cn} ${dn} JP ${p+1}: melebihi batas maksimal JP ${S.cmax[c]}`);R.cell[c+'_'+d+'_'+p]=1}cnt[s]=(cnt[s]||0)+1;(pos[s]=pos[s]||[]).push([d,p]);if(S.win[s]&&p>=S.win[s]){R.err.push(`${S.subjects[s]} kelas ${cn} ${dn} JP ${p+1}: di luar batas JP 1–${S.win[s]}`);R.cell[c+'_'+d+'_'+p]=1}if(isKK(s))kk=1;else if(kk){R.err.push(`Kokurikuler kelas ${cn} hari ${dn} harus di akhir (ada mapel lain setelahnya)`);R.cell[c+'_'+d+'_'+p]=1}}}{const ds=new Set();for(let p=0;p<S.slots[d];p++){const s=S.sched[c][d][p];if(s>=0)ds.add(s)}if(S.maxSubj>0&&ds.size>S.maxSubj){R.err.push(`Kelas ${cn} ${dn}: ${ds.size} mapel dalam sehari (maksimal ${S.maxSubj})`);for(let p=0;p<S.slots[d];p++)if(S.sched[c][d][p]>=0)R.cell[c+'_'+d+'_'+p]=1}}});
+S.subjects.forEach((nm,s)=>{const tg=+S.jp[c+'_'+s]||0,a=cnt[s]||0;if(a!=tg)R.err.push(`JP ${nm} kelas ${cn}: target ${tg}, terjadwal ${a} (selisih ${a-tg})`);
+if(s==pjokIdx()&&S.pjokMode!='free'&&(pos[s]||[]).some(x=>x[0]!=pjokDay(c))){R.err.push(`PJOK kelas ${cn} harus pada hari ${DAYS[pjokDay(c)]}`);(pos[s]||[]).forEach(x=>R.cell[c+'_'+x[0]+'_'+x[1]]=1)}
+{const byD={};(pos[s]||[]).forEach(x=>(byD[x[0]]=byD[x[0]]||[]).push(x[1]));for(const d in byD){const q=byD[d];if(q.some((p,i)=>i>0&&!(p==q[i-1]+1&&(isKK(s)||seg(p)==seg(q[i-1]))))){R.err.push(`${nm} kelas ${cn} ${DAYS[d]}: JP terpisah (mapel >1 JP pada satu hari harus berurutan tanpa disela mapel lain/istirahat)`);q.forEach(p=>R.cell[c+'_'+d+'_'+p]=1)}}}
+{const dset=new Set((pos[s]||[]).map(x=>x[0])),ne=partsOf(tg,s,MXV).length+((!S.blk[s]&&s!=pjokIdx()&&S.slk&&+S.slk[c])||0);if(!isKK(s)&&tg>0&&dset.size>ne){R.err.push(`${nm} kelas ${cn}: dipecah ke ${dset.size} hari (seharusnya cukup ${ne} hari — mapel utama tidak boleh dipecah-pecah)`);(pos[s]||[]).forEach(x=>R.cell[c+'_'+x[0]+'_'+x[1]]=1)}}
+if(S.blk[s]&&a>1){const q=pos[s];if(!q.every((x,i)=>i==0||(x[0]==q[i-1][0]&&x[1]==q[i-1][1]+1&&seg(x[1])==seg(q[i-1][1])))){R.err.push(`${nm} kelas ${cn}: jam dipecah (harus 1 blok berurutan tanpa melewati istirahat)`);q.forEach(x=>R.cell[c+'_'+x[0]+'_'+x[1]]=1)}}})});
+const used=S.teachers.map(()=>DAYS.map((_,d)=>Array(S.slots[d]).fill(0)));
+DAYS.forEach((dn,d)=>{for(let p=0;p<S.slots[d];p++){const m={};S.classes.forEach((_,c)=>{const s=S.sched[c][d][p];if(s>=0){const t=S.asg[c+'_'+s];if(t===undefined||t==='')return;(m[t]=m[t]||[]).push(c);R.tl[t].act++;used[t][d][p]=1}});
+for(const t in m)if(m[t].length>1){R.err.push(`Bentrok guru: ${tn(t)} mengajar kelas ${m[t].map(c=>S.classes[c]).join(' & ')} — ${dn}, JP ${p+1}`);m[t].forEach(c=>R.cell[c+'_'+d+'_'+p]=1)}}});
+S.teachers.forEach((_,t)=>DAYS.forEach((_,d)=>{const u=used[t][d],ix=u.map((v,i)=>v?i:-1).filter(i=>i>=0);if(ix.length){R.tl[t].days++;R.tl[t].gap+=ix[ix.length-1]-ix[0]+1-ix.length}}));
+{const rq=teachReq();S.teachers.forEach((_,t)=>{if(R.tl[t].days<rq[t]){const ms=DAYS.filter((_,d)=>S.slots[d]>0&&!used[t][d].some(v=>v));R.err.push(`Guru ${tn(t)} hanya mengajar ${R.tl[t].days} hari, seharusnya ${rq[t]} hari (tidak mengajar pada: ${ms.join(', ')})`)}})}
+{const pai=paiIdx();if(pai>=0){const per=DAYS.map(()=>[]);S.classes.forEach((cn,c)=>DAYS.forEach((_,d)=>{if(S.sched[c][d].some(x=>x==pai))per[d].push(c)}));const tot=S.classes.filter((_,c)=>+S.jp[c+'_'+pai]>0).length;per.forEach((a,d)=>{if(a.length>1){R.err.push(`PAIPB ${DAYS[d]}: diajarkan di ${a.length} kelas (${a.map(c=>S.classes[c]).join(' & ')}) — hanya boleh 1 kelas per hari`);a.forEach(c=>S.sched[c][d].forEach((x,p)=>{if(x==pai)R.cell[c+'_'+d+'_'+p]=1}))}});const ks=DAYS.filter((_,d)=>S.slots[d]>0&&!per[d].length);if(tot>=DAYS.length&&ks.length)R.err.push(`PAIPB tidak ada pada hari: ${ks.join(', ')} (tidak boleh ada celah hari)`)}}
+return R}
+function status(R){if(!S.sched)return['BELUM ADA JADWAL','wn'];if(R.err.length)return['TIDAK VALID','er'];if(S.demo)return['PERLU VERIFIKASI (memakai JP data uji coba)','wn'];if(!S.verified)return['PERLU VERIFIKASI (target JP belum ditandai terverifikasi)','wn'];return S.locked?['JADWAL FINAL — VALID','ok']:['DRAFT — valid, menunggu pengesahan','wn']}
+
+const pjokIdx=()=>S.subjects.findIndex(x=>/^PJOK/i.test(x)),paiIdx=()=>S.subjects.findIndex((x,i)=>/^Pendidikan Agama/i.test(x)||S.codes[i]=='PAIPB'),es=(c,d)=>EFO?EFO[c][d]:Math.min(S.slots[d],+S.cmax[c]||99),pjokDay=c=>S.pjokMode=='desc'?5-c:S.pjokMode=='asc'?c:-1;
+// ---- mesin penjadwalan: PAIPB/PJOK 1 blok, kokurikuler di akhir hari, istirahat tidak dilewati blok
+var genWarn='',EFO=null,trimNote='';
+function maxSegLen(){let m=0;DAYS.forEach((_,d)=>{let r=0;for(let p=0;p<S.slots[d];p++){r=p>0&&seg(p)==seg(p-1)?r+1:1;m=Math.max(m,r)}});return m}
+function partsOf(n,s,mx){if(S.blk[s]||s==pjokIdx()||n<=mx)return[n];const k=Math.ceil(n/mx),b=Math.floor(n/k),r=n%k;return Array.from({length:k},(_,i)=>b+(i<r?1:0))}
+// Mapel utama tidak dipecah-pecah: tiap mapel dijadwalkan dalam sesi sesedikit mungkin (1 sesi = JP berurutan dalam 1 hari, tidak melewati istirahat). Hanya Kokurikuler yang boleh dipecah.
+// Hari Senin diisi penuh lebih dulu, hari lain menyesuaikan.
+function fullDaysFor(c,tc,lvl){const days=(lvl==0?[0,1,2,3,4,5]:lvl==1?[0,1,2,3]:[0]).filter(d=>d<DAYS.length&&es(c,d)>0),r=[];let sum=0;for(const d of days){if(sum+es(c,d)>tc)break;sum+=es(c,d);r.push(d)}return r}
+function generate(){try{return generate0()}finally{EFO=null}}
+function teachReq(){const A=DAYS.filter((_,d)=>S.slots[d]>0).length,mxs=Math.max(1,Math.min(+S.maxRun||3,maxSegLen()||1)),u=S.teachers.map(()=>0);
+S.classes.forEach((_,c)=>S.subjects.forEach((_,s)=>{const n=+S.jp[c+'_'+s]||0,t=S.asg[c+'_'+s];if(!n||t===undefined||t==='')return;if(isKK(s))u[t]+=n%2==0?n/2:(n>=3?1+(n-3)/2:1);else u[t]+=(S.blk[s]||s==pjokIdx())?1:Math.ceil(n/mxs)}));return u.map(x=>Math.min(A,x))}
+const slkNow2=c=>+(S.slk&&S.slk[c])>0;
+function generate0(){genWarn='';trimNote='';if(!Object.values(S.jp).some(v=>+v>0))return'Gagal: target JP belum diisi. Isi di menu Data & Alokasi JP berdasarkan struktur kurikulum dan KSP yang telah diverifikasi.';
+const MS=+S.maxSubj||0,pi=pjokIdx(),pai=paiIdx(),D=DAYS.length,NC=S.classes.length,tot=S.slots.reduce((a,b)=>a+b,0),tneed=S.teachers.map(()=>0),Kc=[],Pc=[],maxSeg=maxSegLen(),mx=Math.max(1,Math.min(+S.maxRun||3,maxSeg||1));
+for(let c=0;c<NC;c++){Kc[c]=[];Pc[c]=[];let nd=0;for(let s=0;s<S.subjects.length;s++){const n=+S.jp[c+'_'+s]||0,t=S.asg[c+'_'+s];if(!n)continue;if(t===undefined||t==='')return`Gagal: kelas ${S.classes[c]} – ${S.subjects[s]} belum punya guru.`;tneed[t]+=n;nd+=n;
+if(isKK(s))Kc[c].push([s,n]);else{if((S.blk[s]||s==pi)&&n>maxSeg)return`Gagal: ${S.subjects[s]} ${n} JP tidak muat dalam 1 blok (segmen tanpa istirahat terpanjang ${maxSeg} JP). Atur jam istirahat atau JP per hari.`;Pc[c].push({s,t,n,blk:!!(S.blk[s]||s==pi)})}}
+const cap=S.slots.reduce((a,x)=>a+Math.min(x,+S.cmax[c]||99),0);if(nd>cap)return`Gagal: kelas ${S.classes[c]} butuh ${nd} JP, slot tersedia hanya ${cap}${S.cmax[c]?` (dibatasi sampai JP ${S.cmax[c]} per hari)`:''}. Tambah slot, longgarkan batas JP kelas, atau kurangi target JP.`}
+for(let t=0;t<S.teachers.length;t++)if(tneed[t]>tot)return`Gagal: ${tn(t)} bertugas ${tneed[t]} JP, slot hanya ${tot}. Periksa penugasan.`;
+if(pai>=0){const n=S.classes.filter((_,c)=>+S.jp[c+'_'+pai]>0).length;if(n>D)return`Gagal: PAIPB diajarkan di ${n} kelas padahal hanya ada ${D} hari belajar; aturan satu kelas PAIPB per hari tidak mungkin dipenuhi.`}
+const wl={};for(let c=0;c<NC;c++)for(let s=0;s<S.subjects.length;s++){const w=S.win[s],n=+S.jp[c+'_'+s]||0;if(!w||!n||isKK(s))continue;if(n>w&&(S.blk[s]||s==pi))return`Gagal: ${S.subjects[s]} kelas ${S.classes[c]} butuh ${n} JP dalam 1 blok tetapi dibatasi hanya pada JP 1–${w}.`;const t=S.asg[c+'_'+s];wl[t+'_'+s]=(wl[t+'_'+s]||0)+n}
+for(const k in wl){const[t,s]=k.split('_').map(Number),w=S.win[s];let cap=0;S.slots.forEach(x=>cap+=Math.min(w,x));if(wl[k]>cap)return`Gagal: ${tn(t)} harus mengajar ${wl[k]} JP ${S.subjects[s]} hanya pada JP 1–${w}, sedangkan slot yang tersedia hanya ${cap}. Kurangi JP, longgarkan batas JP, atau ganti guru pengampu.`}
+if(pi>=0&&S.pjokMode!='free')for(let c=0;c<NC;c++){const n=+S.jp[c+'_'+pi]||0,f=pjokDay(c);if(n&&(f<0||f>=D||es(c,f)<n))return`Gagal: PJOK kelas ${S.classes[c]} harus pada hari ${DAYS[f]||'?'} tetapi hari itu tidak punya cukup JP (butuh ${n}). Atur jumlah JP hari tersebut atau ubah urutan hari PJOK.`}
+{const D2=DAYS.length;EFO=S.classes.map((_,c)=>{const base=DAYS.map((_,d)=>Math.min(S.slots[d],+S.cmax[c]||99)),tc=S.subjects.reduce((a,_,s)=>a+(+S.jp[c+'_'+s]||0),0);let df=base.reduce((a,b)=>a+b,0)-tc;const ef=[...base],mn=d=>Math.max(3,(pi>=0&&S.pjokMode!='free'&&pjokDay(c)==d)?(+S.jp[c+'_'+pi]||0):0),ord=[3,2,1,0,4,5].filter(d=>d<D2);let g=0;while(df>0&&g++<200){let mv=false;for(const d of ord){if(df<=0)break;if(ef[d]>mn(d)){ef[d]--;df--;mv=true}}if(!mv)break}
+const tr=ef.map((v,d)=>v<base[d]?DAYS[d]+' (JP '+(v+1)+(base[d]>v+1?'–'+base[d]:'')+')':'').filter(Boolean);if(tr.length)trimNote+=' Kelas '+S.classes[c]+': total JP lebih sedikit dari slot, sisa slot kosong di '+tr.join(', ')+'.';return ef})}
+const t0=Date.now(),NL=25000,LIM=[4000,7000,9000,11000],sh=a=>a.map(x=>[Math.random(),x]).sort((a,b)=>a[0]-b[0]).map(x=>x[1]),fdOf=(c,s)=>(pi>=0&&s==pi&&S.pjokMode!='free')?pjokDay(c):-1;
+const REQ=teachReq(),skMin=Array(NC).fill(0),failC=S.classes.map(()=>[0,0,0]);
+for(let ph=0;ph<4;ph++){const strict=ph<3,bal=ph==1;
+for(let at=0;at<3000&&Date.now()-t0<LIM[ph];at++){const cg=S.classes.map(()=>DAYS.map((_,d)=>Array(S.slots[d]).fill(-2))),tg=S.teachers.map(()=>DAYS.map((_,d)=>Array(S.slots[d]).fill(0))),sc=S.classes.map(()=>Array(D).fill(0)),slkNow=Array(NC).fill(0),td=S.teachers.map(()=>Array(D).fill(0)),pd=Array(D).fill(0);let ok=true;
+for(let c=0;c<NC&&ok;c++){
+const K=Kc[c].reduce((a,x)=>a+x[1],0),kd=Array(D).fill(0);
+if(K){const sz=[];if(K%2==0)for(let i=0;i<K/2;i++)sz.push(2);else{if(K>=3){sz.push(3);for(let i=0;i<(K-3)/2;i++)sz.push(2)}else sz.push(1)}const ds=sh([...Array(D).keys()]);for(const z of sz){const d=ds.find(d=>!kd[d]&&es(c,d)>=z);if(d===undefined){ok=false;break}kd[d]=z}}
+if(!ok)break;for(let d=0;d<D;d++)if(kd[d])sc[c][d]++;
+const parts=Pc[c].slice(),pl=parts.length,rem=parts.map(u=>u.n),sl=parts.map(u=>u.blk?1:Math.ceil(u.n/mx)),ptr=Array(D).fill(0),usedD={},T=Array(D).fill(0);
+let remSum=parts.reduce((a,x)=>a+x.n,0),nodes=0;const fs=new Set(strict?fullDaysFor(c,remSum+K,ph):[]),capOf=d=>es(c,d)-kd[d];
+const finish=()=>{const seq=[];Kc[c].forEach(([s,n])=>{for(let i=0;i<n;i++)seq.push([s,S.asg[c+'_'+s]])});let q=0;const pp=[];for(let d=0;d<D;d++)for(let j=0;j<kd[d];j++){const[s,t]=seq[q++],p=ptr[d]+j;if(tg[t][d][p])return false;pp.push([d,p,s,t])}pp.forEach(([d,p,s,t])=>{cg[c][d][p]=s;tg[t][d][p]=1;td[t][d]++});return true};
+let step;
+const winOK=d=>{const ws=new Set();parts.forEach((u,i)=>{if(rem[i]>0&&S.win[u.s])ws.add(S.win[u.s])});for(const w of ws){let need=0,cap=0;parts.forEach((u,i)=>{if(rem[i]>0&&S.win[u.s]&&S.win[u.s]<=w)need+=rem[i]});for(let x=d;x<D;x++)cap+=Math.min(w,capOf(x));if(need>cap)return false}return true};
+const startDay=d=>{if(d==D)return remSum==0&&finish();if(!winOK(d))return false;
+if(d==0||!bal||fs.has(d))T[d]=capOf(d);else{let fut=0,capF=0,nb=0;for(let x=d+1;x<D;x++){fut+=capOf(x);if(fs.has(x))capF+=capOf(x)}for(let x=d;x<D;x++)if(!fs.has(x))nb++;T[d]=Math.max(0,Math.min(capOf(d),Math.max(Math.ceil(Math.max(0,remSum-capF)/Math.max(1,nb)),remSum-fut)))}
+return step(d,0)};
+step=(d,a)=>{if(++nodes>NL)return false;const cap=capOf(d);
+if(a<cap){const cs=[];
+for(let i=0;i<pl;i++){if(rem[i]<=0)continue;const u=parts[i],f=fdOf(c,u.s);if(f>=0&&f!=d)continue;if(f!=d&&a>=T[d])continue;if(usedD[u.s+'_'+d])continue;if(u.s==pai&&pd[d])continue;if(MS&&sc[c][d]>=MS)continue;
+const hi=u.blk?rem[i]:Math.min(rem[i],mx),lo=u.blk?rem[i]:1;
+for(let L=hi;L>=lo;L--){const e=a+L;if(e>cap)continue;if(S.win[u.s]&&e>S.win[u.s])continue;if(seg(a)!=seg(e-1))continue;if(!u.blk&&Math.ceil((rem[i]-L)/mx)>sl[i]-1)continue;let fr=true;for(let k=0;k<L;k++)if(tg[u.t][d][a+k]){fr=false;break}if(!fr)continue;cs.push([i,L,f==d?-9:Math.random()-L*.4-(td[u.t][d]==0?3:0)-((S.win[u.s]&&e<=S.win[u.s])?5:0)])}}
+cs.sort((x,y)=>x[2]-y[2]);
+for(const[i,L]of cs){const u=parts[i];
+for(let k=0;k<L;k++){cg[c][d][a+k]=u.s;tg[u.t][d][a+k]=1}td[u.t][d]+=L;rem[i]-=L;sl[i]--;usedD[u.s+'_'+d]=1;if(u.s==pai)pd[d]++;sc[c][d]++;remSum-=L;
+if(step(d,a+L))return true;
+for(let k=0;k<L;k++){cg[c][d][a+k]=-2;tg[u.t][d][a+k]=0}td[u.t][d]-=L;rem[i]+=L;sl[i]++;usedD[u.s+'_'+d]=0;if(u.s==pai)pd[d]--;sc[c][d]--;remSum+=L;
+if(nodes>NL)return false}}
+if(parts.some((u,i)=>rem[i]>0&&fdOf(c,u.s)==d))return false;
+if(fs.has(d)&&a<cap)return false;
+ptr[d]=a;return startDay(d+1)};
+let got=false;for(let sk=skMin[c];sk<=2&&!got;sk++){parts.forEach((u,i)=>{sl[i]=u.blk?1:Math.ceil(u.n/mx)+sk});nodes=0;got=startDay(0);if(got)slkNow[c]=sk;else{failC[c][sk]++;if(failC[c][sk]>=6&&skMin[c]==sk&&sk<2)skMin[c]++}}
+if(!got)ok=false}
+if(!ok)continue;
+if(ph<3&&S.teachers.some((_,t)=>td[t].filter(v=>v>0).length<REQ[t]))continue;
+S.sched=cg.map(a=>a.map(b=>b.map(x=>x<0?-1:x)));S.slk=slkNow;S.locked=false;
+const nf=[];S.classes.forEach((cn,c)=>{const tc=S.subjects.reduce((a,_,s)=>a+(+S.jp[c+'_'+s]||0),0),want=fullDaysFor(c,tc,0),miss=want.filter(d=>S.sched[c][d].filter(x=>x>=0).length<es(c,d));if(miss.length)nf.push(cn+' ('+miss.map(d=>DAYS[d]).join('/')+')')});
+if(nf.length)genWarn=' Catatan: ada hari yang belum penuh tanpa celah untuk kelas '+nf.join(', ')+' karena terbentur bentrok guru/susunan JP.';
+if(pai>=0&&pd.some((v,d)=>!v&&S.slots[d]>0))genWarn+=' Catatan: PAIPB belum ada pada hari '+DAYS.filter((_,d)=>!pd[d]&&S.slots[d]>0).join(', ')+' karena jumlah kelas ber-PAIPB kurang dari jumlah hari.';if(trimNote)genWarn+=trimNote;if(ph>=3){const bad=S.teachers.map((_,t)=>td[t].filter(v=>v>0).length<REQ[t]?tn(t):'').filter(Boolean);if(bad.length)genWarn+=' Catatan: guru berikut belum bisa mengajar di semua hari: '+bad.join(', ')+'.'}{const sp=S.classes.filter((_,c)=>slkNow2(c));if(sp.length)genWarn+=' Catatan: pada kelas '+sp.join(', ')+', agar tidak ada JP kosong, sebagian mapel terpaksa dipecah menjadi lebih dari jumlah sesi minimal (jam istirahat membuat segmen JP terpotong).'}logc('Generate jadwal otomatis');return'OK'}}
+return'Tidak ditemukan jadwal setelah banyak percobaan (±10 detik). Kemungkinan penyebab: JP satu mapel utama tidak bisa disusun dalam sesi berurutan tanpa dipecah (segmen antar-istirahat terlalu pendek), hari PJOK tiap kelas terlalu sempit, batas JP kelas atau batas mapel per hari terlalu kecil, batas JP 1–N (mis. PJOK) bentrok antar kelas pada guru yang sama (satu guru hanya bisa satu kelas per waktu), atau jumlah JP per hari belum cukup. Coba longgarkan salah satunya.'}
+// ---- aksi
+const KC=[['#f0508a','#fff0f5','#fff'],['#f08c00','#fff4e0','#fff'],['#ffd43b','#fffbe0','#4a3b00'],['#2b9f5f','#eafaf1','#fff'],['#1c7ed6','#e8f4ff','#fff'],['#7950f2','#f3eeff','#fff'],['#0b9ab0','#e3fafc','#fff'],['#e64980','#fff0f7','#fff']],
+kth=n=>{const t=n>=100?KC[n-100]:KC[n%6];return`--k:${t[0]};--kl:${t[1]};--kt:${t[2]};`},
+SB=[[/agama|budi pekerti/i,'','#1b9e5a','#fff'],[/pancasila|pkn/i,'','#d62839','#fff'],[/btq|qur|baca tulis/i,'','#a4d11e','#1f2d00'],[/madura|daerah|lokal/i,'','#8a5a2b','#fff'],[/indonesia/i,'','#ffd60a','#2b2400'],[/matematika|mtk/i,'','#1d6fdc','#fff'],[/ipas|ipa\b|ips\b|alam|sosial/i,'','#19c3d6','#00282e'],[/pjok|jasmani|olahraga/i,'','#ff7a1a','#2e1200'],[/seni|budaya/i,'','#8e44ad','#fff'],[/inggris/i,'','#ff5fa2','#fff'],[/koding|artifisial|komputer|informatika/i,'','#34495e','#fff'],[/kokurikuler|projek/i,'','#c4b0ff','#1e0f4d']],
+sb=s=>{const n=S.subjects[s]||'',m=SB.find(x=>x[0].test(n));if(m)return m;const h=(s*47)%360;return[0,'',`hsl(${h} 75% 55%)`,'#fff']},
+ico=s=>sb(s)[1],sty=s=>`--c:${sb(s)[2]};--i:${sb(s)[3]}`,ft=()=>'<div class="ft">Belajar dengan gembira, tumbuh bersama!</div>';
+const TA='2026/2027',PAPER={A4:[210,297],F4:[215,330],Letter:[216,279]};
+function act(f,...a){window[f](...a);save();render()}
+function doGen(){const r=generate();msg=r=='OK'?'Jadwal berhasil dibuat dan lolos pemeriksaan bentrok.'+genWarn:r}
+function setTeach(i,v){S.teachers[i].n=v}function addT(){S.teachers.push({n:'Guru Baru'})}function addS(){const n=S.subjects.length;S.win.push(0);S.subjects.push('Mapel Baru');S.codes.push('MP'+(n+1));S.blk.push(0);for(let c=0;c<6;c++){S.jp[c+'_'+n]=0}}
+function setCode(i,v){S.codes[i]=v.trim().toUpperCase()}function setWin(i,v){S.win[i]=Math.max(0,Math.min(12,Math.floor(+v)||0));S.sched&&(msg='Batas JP berubah — Generate ulang jadwal.')}function setPjok(v){S.pjokMode=v;S.sched&&(msg='Urutan hari PJOK berubah — Generate ulang jadwal.')}function setCmax(i,v){S.cmax[i]=Math.max(0,Math.min(12,Math.floor(+v)||0));S.sched&&(msg='Batas JP kelas berubah — Generate ulang jadwal.')}function setBlk(i,v){S.blk[i]=v?1:0;S.sched&&(msg='Pengaturan blok berubah — Generate ulang jadwal.')}function setKop(k,v){S.kop[k]=v}
+function setPr(k,v){S.pr[k]=v;if(k=='mode'&&v=='all')S.pr.ori='landscape'}
+function clearImg(k){S.kop[k]='';if(k=='img'){S.kop.imgW=1;S.kop.imgH=.2}}
+function imgUp(key,maxW,e){const f=e.target.files[0];e.target.value='';if(!f)return;
+if(!/^image\/(png|jpe?g|webp)$/.test(f.type)){msg='Format gambar harus PNG, JPG, atau WebP.';render();return}
+const im=new Image(),u=URL.createObjectURL(f);
+im.onload=()=>{URL.revokeObjectURL(u);const sc=Math.min(1,maxW/im.width),w=Math.max(1,Math.round(im.width*sc)),h=Math.max(1,Math.round(im.height*sc)),c=document.createElement('canvas');c.width=w;c.height=h;const x=c.getContext('2d');
+let data;if(f.type==='image/png'){x.drawImage(im,0,0,w,h);data=c.toDataURL('image/png');if(data.length>1.3e6){x.clearRect(0,0,w,h);x.fillStyle='#fff';x.fillRect(0,0,w,h);x.drawImage(im,0,0,w,h);data=c.toDataURL('image/jpeg',.9)}}
+else{x.fillStyle='#fff';x.fillRect(0,0,w,h);x.drawImage(im,0,0,w,h);data=c.toDataURL('image/jpeg',.9)}
+S.kop[key]=data;if(key=='img'){S.kop.imgW=w;S.kop.imgH=h}logc('Unggah gambar '+key);if(save())msg='Gambar diunggah: '+f.name;render()};
+im.onerror=()=>{URL.revokeObjectURL(u);msg='Gambar tidak dapat dibaca.';render()};im.src=u}
+function doPrint(){document.getElementById('pgs').textContent=pageCSS();try{window.print()}catch(e){msg='Cetak tidak tersedia di tampilan ini. Buka berkas di tab/jendela sendiri lalu cetak.';render()}}
+function printTab(t,mode){tab=t;if(mode){S.pr.mode=mode;if(mode=='all')S.pr.ori='landscape';save()}render();setTimeout(doPrint,200)}
+function dlg(text,ok,cancel){return new Promise(r=>{const d=document.createElement('div');d.className='ov np';d.innerHTML=`<div class="md" role="dialog" aria-modal="true"><p>${esc(text)}</p><div class="row"><button class="b p" id="dy">${esc(ok||'Ya, lanjutkan')}</button><button class="b" id="dn">${esc(cancel||'Batal')}</button></div></div>`;document.body.appendChild(d);const f=v=>{d.remove();r(v)};d.querySelector('#dy').onclick=()=>f(true);d.querySelector('#dn').onclick=()=>f(false);d.addEventListener('keydown',e=>{if(e.key=='Escape')f(false)});d.querySelector('#dn').focus()})}
+function setSub(i,v){S.subjects[i]=v}function setJP(c,s,v){S.jp[c+'_'+s]=Math.max(0,+v||0);S.sched&&(msg='Target JP berubah — jalankan Generate ulang atau periksa konflik.');logc('Ubah JP')}
+function setAsg(c,s,v){S.asg[c+'_'+s]=v===''?'':+v}
+function setSlot(d,v){S.slots[d]=Math.max(0,Math.min(12,+v||0));if(S.sched){S.sched=S.sched.map(cl=>cl.map((r,dd)=>dd==d?Array.from({length:S.slots[d]},(_,i)=>r[i]>=0?r[i]:-1):r));msg='Jumlah JP hari berubah — periksa konflik atau Generate ulang.'}}
+function setCfg(k,v){S[k]=(k=='start')?v:+v;if(k=='maxSubj'){S.maxSubj=Math.max(0,Math.min(12,Math.floor(+v)||0));S.sched&&(msg='Batas mapel per hari berubah — Generate ulang jadwal.')}}function setVer(v){S.verified=!!v&&!S.demo}
+function setCell(c,d,p,v){S.sched[c][d][p]=+v;S.locked=false;logc(`Ubah slot kelas ${S.classes[c]} ${DAYS[d]} JP${p+1}`)}
+async function loadDemo(){if(await dlg('Muat JP contoh uji coba? Angka ini asumsi teknis, BUKAN struktur kurikulum resmi. Target JP saat ini akan ditimpa dan jadwal dikosongkan.','Muat contoh')){const dj=demoJP();S.subjects.forEach((_,s)=>{for(let c=0;c<6;c++)S.jp[c+'_'+s]=dj[c+'_'+s]||0});S.demo=true;S.verified=false;S.sched=null;S.locked=false;logc('Muat JP contoh uji coba');save();msg='JP contoh dimuat. Jadwal berstatus PERLU VERIFIKASI selama data uji coba dipakai.';render()}}
+async function clearJP(){if(await dlg('Kosongkan seluruh target JP lalu isi dari struktur kurikulum yang telah diverifikasi? Jadwal saat ini ikut dikosongkan.','Kosongkan JP')){S.subjects.forEach((_,s)=>{for(let c=0;c<6;c++)S.jp[c+'_'+s]=0});S.demo=false;S.verified=false;S.sched=null;S.locked=false;logc('Kosongkan target JP');save();msg='Target JP dikosongkan.';render()}}
+function lock(){const R=validate();if(R.err.length||!S.verified||!S.sched||S.demo){msg='Tidak dapat dikunci: masih ada konflik, memakai JP uji coba, atau target JP belum ditandai terverifikasi.';return}S.locked=true;logc('Jadwal dikunci Kepala Sekolah/berwenang');msg='Jadwal dikunci sebagai FINAL.'}
+function unlock(){S.locked=false;logc('Kunci dibuka')}
+async function reset(){if(await dlg('Hapus semua data & jadwal lalu kembali ke data awal? Unduh cadangan terlebih dahulu bila perlu.','Hapus semua')){S=def();fix();save();msg='Data direset.';render()}}
+async function dl(name,txt,type){try{let d=null;try{d=window.claude&&claude.use?await claude.use('downloads'):null}catch(e){}
+if(d){await d.save({filename:name,data:txt});msg='Berkas disimpan: '+name}
+else{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([txt],{type}));a.download=name;document.body.appendChild(a);a.click();a.remove();const u=a.href;setTimeout(()=>URL.revokeObjectURL(u),5000);msg='Unduhan dimulai: '+name+'. Jika berkas tidak muncul, unduhan diblokir oleh peramban/tampilan ini — buka aplikasi di tab sendiri.'}render()}catch(e){msg=(e&&e.code=='declined')?'Unduhan dibatalkan.':'Unduhan gagal: '+((e&&e.message)||e);render()}}
+function csv(){let r=[['Kelas','Hari','JP','Waktu','Kode','Mapel','Guru']];if(S.sched)S.classes.forEach((cn,c)=>DAYS.forEach((dn,d)=>{for(let p=0;p<S.slots[d];p++){const s=S.sched[c][d][p];if(s>=0)r.push([cn,dn,p+1,tm(p)+'-'+te(p),cd(s),S.subjects[s],tn(S.asg[c+'_'+s])])}}));dl('jadwal-lanas1.csv','\ufeff'+r.map(x=>x.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\n'),'text/csv')}
+function bak(){dl('cadangan-jadwal-lanas1.json',JSON.stringify(S),'application/json')}
+async function imp(e){const f=e.target.files[0];e.target.value='';if(!f)return;let o;
+try{o=JSON.parse(await f.text())}catch(x){msg='Impor ditolak: berkas bukan JSON yang valid. Data saat ini tidak diubah.';render();return}
+normSched(o);const er=okData(o);if(er){msg='Impor ditolak: '+er+' Data saat ini tidak diubah.';render();return}
+if(!await dlg(`Ganti seluruh data (${S.teachers.length} guru) dengan isi berkas (${o.teachers.length} guru${o.sched?', berisi jadwal':''})? Salinan data saat ini disimpan otomatis pada kunci "lss4_sebelum_impor" di peramban.`,'Ganti data'))return;
+try{localStorage.setItem('lss4_sebelum_impor',JSON.stringify(S))}catch(x){}
+const old=S;S=o;try{fix();validate()}catch(x){S=old;msg='Impor dibatalkan: berkas tidak dapat diproses ('+x.message+'). Data saat ini tidak diubah.';render();return}
+if(save())msg='Data dipulihkan dari cadangan.';render()}
+// ---- tampilan
+function sel(opts,val,fn,cls=''){return`<select class="${cls}" onchange="${fn}">${opts.map(([v,l])=>`<option value="${v}"${String(v)==String(val)?' selected':''}>${esc(l)}</option>`).join('')}</select>`}
+function grid(fn,mx,cls=''){let h=`<div class="sc"><table class="jt ${cls}"><colgroup><col class="cj"><col class="cw">${DAYS.map(()=>'<col>').join('')}</colgroup><thead><tr><th>JP</th><th>Waktu</th>${DAYS.map(d=>`<th>${d}</th>`).join('')}</tr></thead><tbody>`;
+if(S.litOn&&S.litMin>0){const[hh,mm]=S.start.split(':').map(Number),a=hh*60+mm;h+=`<tr class="lit"><th class="jp">Lit</th><th class="wk">${hm(a)}–${hm(a+S.litMin)}</th><td colspan="${DAYS.length}">LITERASI PAGI · ${S.litMin} menit</td></tr>`}
+for(let p=0;p<mx;p++){h+=`<tr><th class="jp">${p+1}</th><th class="wk">${tm(p)}–${te(p)}</th>`+DAYS.map((_,d)=>p>=S.slots[d]?'<td class="x">·</td>':fn(d,p)).join('')+'</tr>';
+for(const[b,m,n]of[[S.brk1,S.brk1Min,1],[S.brk2,S.brk2Min,2]])if(b>0&&p+1==b&&mx>b){const a=pm(p)+S.jpMin;h+=`<tr class="brk"><td colspan="${DAYS.length+2}">ISTIRAHAT ${n} · ${hm(a)}–${hm(a+m)} (${m} menit)</td></tr>`}}
+return h+'</tbody></table></div>'}
+function schedTable(c,R,edit){return grid((d,p)=>{if(p>=es(c,d))return'<td class="x">·</td>';const s=S.sched[c][d][p],bad=R.cell[c+'_'+d+'_'+p];return`<td class="cd ${s>=0?'cl':''} ${bad?'bad':''}" ${s>=0?`style="${sty(s)}"`:''}>`+(edit&&!S.locked?sel([[-1,'—'],...S.subjects.map((x,i)=>[i,cd(i)+' — '+x])],s,`act('setCell',${c},${d},${p},this.value)`,'np')+`<span class="pc">${s>=0?esc(cd(s)):''}</span>`:(s>=0?esc(cd(s)):'—'))+(bad?' <b class="er">⚠</b>':'')+'</td>'},Math.max(...S.slots))}
+function paper(){const p=PAPER[S.pr.size]||PAPER.A4;return S.pr.ori=='landscape'?[p[1],p[0]]:[p[0],p[1]]}
+function pageCSS(){const[w,h]=paper();return`@page{size:${w}mm ${h}mm;margin:${S.pr.m}mm}`}
+function fit(mode,nIds,th=0){const[pw,ph]=paper(),m=S.pr.m,W=pw-2*m,H=ph-2*m,K=S.kop,Wi=W-10,ks=Math.max(.75,Math.min(1.2,Math.min(Wi/180,H/250))),kr=K.img?K.imgH/K.imgW:0,kcap=Math.min(55,H*(mode=='all'?.15:.17)),kw=K.img?Math.min(Wi,kcap/kr):Wi,kh=K.img?kw*kr+2:26*ks,kv=`--W:${W}mm;--ks:${ks.toFixed(2)};--kw:${kw.toFixed(1)}mm;--kh:${kh.toFixed(1)}mm;`,mx=Math.max(...S.slots),nb=[S.brk1,S.brk2].filter(b=>b>0&&mx>b).length,rows=1+mx+nb*.7+(S.litOn&&S.litMin>0?.7:0),sg=K.showSign?36:0,kt=kth(th);
+if(mode=='all'){const gc=pw>ph?3:2,gr=Math.ceil(6/gc),bot=Math.max(sg,Math.ceil(nIds/4)*4+6),avail=H-kh-14-bot-6-12,rh=Math.max(3,Math.min(8,(avail/gr-9)/rows));return`${kt}${kv}--gc:${gc};--rh:${rh.toFixed(2)}mm;--fs:${Math.max(5,Math.min(9,rh*2.83*.5)).toFixed(1)}pt;--H:${H}mm`}
+const leg=Math.ceil(nIds/2)*5.2+7,avail=H-kh-18-sg-leg-8-12,rh=Math.max(6,Math.min(13,avail/rows));return`${kt}${kv}--rh:${rh.toFixed(2)}mm;--fs:${Math.max(8,Math.min(11,rh*2.83*.5)).toFixed(1)}pt;--H:${H}mm`}
+const fd=d=>d.toLocaleDateString('id-ID',{day:'numeric',month:'long',year:'numeric'}),
+kop=()=>{const k=S.kop;if(k.img)return`<div class="kopimg"><img src="${k.img}" alt="KOP sekolah"></div>`;return`<div class="kop">${k.logo?`<img class="lg" src="${k.logo}" alt="Logo">`:''}<div class="kt">${[k.i1,k.i2].filter(Boolean).map(x=>`<div>${esc(x)}</div>`).join('')}<div class="sn">${esc(k.sk)}</div><div class="al">${esc(k.al)}</div></div></div>`},
+sign=()=>{const k=S.kop;if(!k.showSign)return'';return`<div class="sign"><div><div>${esc(k.kota)}, ${fd(k.tgl?new Date(k.tgl):new Date())}</div><div>${esc(k.jab)}</div><div class="sp">${k.stp?`<img class="stp" src="${k.stp}" alt="Stempel">`:''}${k.ttd?`<img class="ttd" src="${k.ttd}" alt="Tanda tangan">`:''}</div><b><u>${esc(k.kepsek)}</u></b><div>NIP. ${esc(k.nip)}</div></div></div>`},
+leg=ids=>`<div class="leg"><b>Keterangan kode mapel:</b><ul>${ids.map(s=>`<li><span class="chip" style="${sty(s)}">${esc(cd(s))}</span> ${esc(S.subjects[s])}</li>`).join('')}</ul></div>`;
+function printBar(allowMode){const o=(a)=>a;return`<div class="card np"><div class="row"><b>Atur cetak:</b>${allowMode?`<label>Tampilan ${sel([['per','Per kelas (1 halaman tiap kelas)'],['all','Semua kelas dalam 1 lembar']],S.pr.mode,"act('setPr','mode',this.value)")}</label>`:''}<label>Kertas ${sel([['A4','A4 (210×297 mm)'],['F4','F4/Folio (215×330 mm)'],['Letter','Letter (216×279 mm)']],S.pr.size,"act('setPr','size',this.value)")}</label><label>Orientasi ${sel([['portrait','Potret'],['landscape','Lanskap']],S.pr.ori,"act('setPr','ori',this.value)")}</label><button class="b p" onclick="doPrint()">Cetak</button></div><small>Ukuran baris, huruf, dan KOP disesuaikan otomatis dengan ukuran kertas. Pada dialog cetak, pilih ukuran kertas yang sama dan skala 100%.</small></div>`}
+function allDoc(R){const ids=S.subjects.map((_,s)=>s).filter(s=>S.classes.some((_,c)=>+S.jp[c+'_'+s]>0));
+return`<div class="card doc all" style="${fit('all',ids.length,107)}">${kop()}<div class="dt"><span class="bn">JADWAL PELAJARAN SEMUA KELAS</span><span class="ta">TAHUN PELAJARAN ${TA}</span></div><div class="allg">${S.classes.map((c,i)=>`<div class="mini" style="${kth(i)}"><div class="mt">KELAS ${c}</div>${grid((d,p)=>{if(p>=es(i,d))return'<td class="x">·</td>';const s=S.sched[i][d][p],bad=R.cell[i+'_'+d+'_'+p];return`<td class="cd ${s>=0?'cl':''} ${bad?'bad':''}" ${s>=0?`style="${sty(s)}"`:''}>${s>=0?esc(cd(s)):''}</td>`},Math.max(...S.slots),'mini')}</div>`).join('')}</div><div class="bot">${leg(ids)}${sign()}</div>${ft()}</div>`}
+function draw(){const R=validate(),[st,sc]=status(R);$('#nav').innerHTML=TABS.map(([k,l])=>`<button class="${tab==k?'on':''}" onclick="tab='${k}';render()">${l}</button>`).join('');
+$('#pgs').textContent=pageCSS();
+const stTag=`<span class="tag ${sc}">${st}</span>`;let h=msg?`<div class="card np"><b>${esc(msg)}</b></div>`:'';msg='';
+if(S.demo)h+='<div class="card warn np"><b>DATA UJI COBA.</b> Target JP yang terisi adalah angka contoh teknis, bukan struktur kurikulum resmi. Jadwal tidak dapat berstatus FINAL selama data ini dipakai. Gunakan "Kosongkan JP" di menu Data lalu isi dari dokumen resmi.</div>';
+if(tab=='dash'){const tj=Object.values(S.jp).reduce((a,b)=>a+(+b||0),0),act=S.subjects.filter((_,s)=>S.classes.some((_,c)=>+S.jp[c+'_'+s]>0)).length;
+h+=`<div class="card"><h2>Status</h2>${stTag}<div class="row" style="margin-top:10px"><button class="b p" onclick="act('doGen')">Generate Jadwal Otomatis</button><button class="b" onclick="act('lock')">Kunci Jadwal Final</button><button class="b" onclick="act('unlock')">Buka Kunci</button></div></div>
+<div class="card"><h2>Ringkasan</h2><table><tr><th>Guru</th><td>${S.teachers.length}</td><th>Rombel</th><td>6</td><th>Mapel aktif</th><td>${act}</td></tr><tr><th>Total target JP (semua kelas)</th><td>${tj}</td><th>Slot/pekan per kelas</th><td>${S.slots.reduce((a,b)=>a+b,0)}</td><th>Konflik/selisih</th><td class="${R.err.length?'er':'ok'}">${S.sched?R.err.length:'-'}</td></tr></table>${tj==0?'<p class="er"><b>Target JP belum diisi.</b> Isi di menu Data &amp; Alokasi JP sesuai struktur kurikulum SD yang telah diverifikasi dan KSP sekolah.</p>':''}</div>
+<div class="card"><h2>Catatan penting</h2><p>Target JP <b>tidak diisi otomatis</b>: isi sendiri dari struktur kurikulum yang telah diverifikasi (Permendikdasmen 13/2025 beserta lampirannya) dan KSP sekolah, lalu centang verifikasi di menu Data. Tombol "Muat JP contoh" hanya untuk uji coba. Jam belajar, jumlah JP per hari, dan istirahat bawaan hanyalah nilai awal yang dapat diubah; sesuaikan dengan ketentuan sekolah. Kokurikuler diampu guru kelas dan ditempatkan di akhir hari belajar. PAIPB dan PJOK dijadwalkan sebagai 1 blok JP berurutan dan tidak melewati istirahat; PJOK selalu ditempatkan pada JP 1–3 (dapat diubah di kolom "Hanya di JP 1–N") dengan urutan hari per kelas (bawaan: Kelas I Sabtu, II Jumat, III Kamis, IV Rabu, V Selasa, VI Senin; bisa dibalik di menu Data). Matematika dan IPAS (mapel yang menuntut konsentrasi dan penalaran) juga ditempatkan pada JP 1–3; mapel lain, mis. Bahasa Indonesia atau PP, dapat ditambahkan dengan mengisi kolom "Hanya di JP 1–N" = 3. PAIPB bebas ditempatkan di JP berapa pun, tetapi hanya satu kelas per hari dan tersebar tanpa celah hari (6 kelas = Senin–Sabtu masing-masing satu kelas) (kolom "Hanya di JP 1–N" = 0). Kelas I dibatasi maksimal sampai JP 6 dan Kelas II sampai JP 7. Setiap kelas dibatasi maksimal 5 mata pelajaran berbeda per hari (dapat diubah di menu Data). Kokurikuler dipecah per 2 JP (6 JP = 2+2+2; jumlah ganjil, mis. 7 JP = 3+2+2). Literasi pagi 15 menit mendahului JP 1 setiap hari dan tidak dihitung sebagai JP. Mapel utama (PP, BIND, MTK, dst.) tidak dipecah-pecah: tiap mapel disusun dalam jumlah sesi paling sedikit (maks. sesuai JP berurutan tanpa istirahat, mis. 4 JP = 2+2, 7 JP = 3+2+2), tiap sesi berurutan dalam satu hari. Hanya Kokurikuler yang boleh dipecah. Setiap guru dijadwalkan mengajar di semua hari belajar (sebanyak jumlah sesi yang dimilikinya). Jam belajar Jumat dan Sabtu sampai JP 5. Seluruh hari Senin–Sabtu diisi penuh tanpa celah. Bila total JP suatu kelas lebih sedikit dari slot yang tersedia, kekurangannya dikosongkan di JP terakhir hari Kamis, Rabu, Selasa, lalu Senin (satu JP per hari) dan dicatat setelah Generate. Seluruh guru dianggap tersedia setiap hari. Validasi ruang/sarana belum aktif karena data ruang belum diisi.</p></div>`}
+if(tab=='data'){const up=(k,l,w,hint)=>`<div class="up"><b>${l}</b>${S.kop[k]?`<img class="thumb" src="${S.kop[k]}" alt="${l}">`:'<small>Belum ada</small>'}<input type="file" accept="image/png,image/jpeg,image/webp" onchange="imgUp('${k}',${w},event)" aria-label="Unggah ${l}">${S.kop[k]?`<button class="b s" onclick="act('clearImg','${k}')">Hapus</button>`:''}<small>${hint}</small></div>`;
+h+=`<div class="card"><h2>Jam belajar</h2><div class="row"><label>Mulai (literasi pagi) <input type="time" value="${S.start}" onchange="act('setCfg','start',this.value)"></label><label>Menit/JP <input type="number" value="${S.jpMin}" onchange="act('setCfg','jpMin',this.value)"></label><label><input type="checkbox" ${S.litOn?'checked':''} onchange="act('setCfg','litOn',this.checked)"> Literasi pagi</label><label>Menit <input type="number" value="${S.litMin}" onchange="act('setCfg','litMin',this.value)"></label><label>Maks JP berurutan per sesi mapel <input type="number" min="1" max="6" value="${S.maxRun}" onchange="act('setCfg','maxRun',this.value)"></label><label>Maks mapel berbeda/hari tiap kelas (0 = bebas) <input type="number" min="0" max="12" value="${S.maxSubj}" onchange="act('setCfg','maxSubj',this.value)"></label>${[['brk1','Istirahat 1 setelah JP ke-'],['brk1Min','Menit'],['brk2','Istirahat 2 setelah JP ke-'],['brk2Min','Menit']].map(([k,l])=>`<label>${l} <input type="number" value="${S[k]}" onchange="act('setCfg','${k}',this.value)"></label>`).join('')}</div>
+<div class="sc"><table><tr><th>Hari</th>${DAYS.map(d=>`<th>${d}</th>`).join('')}</tr><tr><th>Jumlah JP/hari</th>${DAYS.map((_,d)=>`<td><input type="number" value="${S.slots[d]}" onchange="act('setSlot',${d},this.value)"></td>`).join('')}</tr></table></div><div class="row" style="margin-top:8px"><label>Hari PJOK per kelas ${sel([['desc','Kelas I Sabtu → Kelas VI Senin'],['asc','Kelas I Senin → Kelas VI Sabtu'],['free','Bebas (acak)']],S.pjokMode,"act('setPjok',this.value)")}</label></div><div class="row" style="margin-top:6px"><b>Maks JP per hari tiap kelas (0 = ikuti JP hari):</b>${S.classes.map((c,i)=>`<label>Kelas ${c} <input type="number" min="0" max="12" value="${S.cmax[i]||0}" onchange="act('setCmax',${i},this.value)" aria-label="Maksimal JP kelas ${c}"></label>`).join('')}</div><small>Nilai awal ini bukan ketentuan resmi; sesuaikan dengan ketentuan sekolah.</small></div>
+<div class="card"><h2>Daftar nama guru</h2><div class="f">${S.teachers.map((t,i)=>`<input value="${esc(t.n)}" onchange="act('setTeach',${i},this.value)" aria-label="Nama guru ${i+1}">`).join('')}</div><button class="b" style="margin-top:8px" onclick="act('addT')">+ Guru</button></div>
+<div class="card"><h2>KOP sekolah &amp; pengesahan (tampil di semua dokumen cetak)</h2>
+<div class="row" style="align-items:flex-start;gap:20px">${up('img','Gambar KOP sekolah',1600,'Gambar KOP selebar halaman (PNG/JPG, disarankan lebar ≥ 1200 px). Bila ada, menggantikan KOP teks.')}${up('logo','Logo (untuk KOP teks)',300,'Dipakai bila tidak ada gambar KOP.')}${up('ttd','Tanda tangan Kepala Sekolah',600,'PNG latar transparan paling baik.')}${up('stp','Stempel sekolah',500,'PNG latar transparan paling baik.')}</div>
+<div class="f" style="margin-top:12px">${[['i1','Baris 1 KOP teks'],['i2','Baris 2 KOP teks (boleh kosong)'],['sk','Nama sekolah'],['al','Alamat / kontak'],['kota','Tempat pengesahan'],['jab','Jabatan penandatangan'],['kepsek','Nama Kepala Sekolah'],['nip','NIP']].map(([k,l])=>`<label>${l}<input value="${esc(S.kop[k])}" onchange="act('setKop','${k}',this.value)"></label>`).join('')}<label>Tanggal pengesahan<input type="date" value="${S.kop.tgl}" onchange="act('setKop','tgl',this.value)"></label></div>
+<label class="row" style="margin-top:8px"><input type="checkbox" ${S.kop.showSign?'checked':''} onchange="act('setKop','showSign',this.checked)"> Tampilkan blok pengesahan (tempat, tanggal, tanda tangan, stempel)</label><small>Tanggal dikosongkan = memakai tanggal hari ini. Gambar disimpan di peramban perangkat ini.</small>
+<div style="margin-top:10px"><b>Pratinjau:</b><div class="card" style="background:#fff;color:#000">${kop()}${sign()}</div></div></div>
+<div class="card"><h2>Mata pelajaran, JP/pekan & guru pengampu</h2><div class="row">${S.classes.map((c,i)=>`<button class="b ${selC==i?'p':''}" onclick="selC=${i};render()">Kelas ${c}</button>`).join('')}</div><div class="sc"><table><tr><th>Kode</th><th>Mapel (JP 0 = tidak diterapkan)</th><th>JP</th><th>Guru pengampu</th><th>Jam 1 blok (tidak dipecah)</th><th>Hanya di JP 1–N (0 = bebas)</th></tr>${S.subjects.map((s,i)=>`<tr><td><input style="width:80px" value="${esc(S.codes[i])}" onchange="act('setCode',${i},this.value)"></td><td><input value="${esc(s)}" onchange="act('setSub',${i},this.value)"></td><td><input type="number" value="${S.jp[selC+'_'+i]||0}" onchange="act('setJP',${selC},${i},this.value)"></td><td>${sel([['','— pilih —'],...S.teachers.map((t,j)=>[j,t.n])],S.asg[selC+'_'+i]??'',`act('setAsg',${selC},${i},this.value)`)}</td><td><input type="checkbox" ${S.blk[i]?'checked':''} onchange="act('setBlk',${i},this.checked)"></td><td><input type="number" min="0" max="12" value="${S.win[i]||0}" onchange="act('setWin',${i},this.value)" aria-label="Batas JP ${esc(S.codes[i])}"></td></tr>`).join('')}</table></div><div class="row" style="margin-top:8px"><button class="b" onclick="act('addS')">+ Mapel</button><button class="b" onclick="loadDemo()">Muat JP contoh (uji coba)</button><button class="b" onclick="clearJP()">Kosongkan JP</button><label><input type="checkbox" ${S.verified?'checked':''} ${S.demo?'disabled':''} onchange="act('setVer',this.checked)"> Target JP sudah saya verifikasi terhadap struktur kurikulum &amp; KSP</label></div></div>`}
+if(tab=='kelas'){if(!S.sched)h+='<div class="card">Belum ada jadwal. Klik Generate di Dashboard.</div>';else{h+=`<div class="card np"><div class="row"><b>Status:</b>${stTag}<button class="b" onclick="editMode=!editMode;render()">${editMode?'Matikan ubah manual':'Aktifkan ubah manual'}</button></div><small>Jadwal ditampilkan tanpa pilihan dropdown. Ubah manual hanya aktif bila tombol dinyalakan (kembali mati saat halaman dimuat ulang); setiap ubahan tetap diperiksa konflik.</small></div>`+printBar(true);
+if(S.pr.mode=='all')h+=`<div class="docs">${allDoc(R)}</div>`;
+else h+='<div class="docs">'+S.classes.map((c,i)=>{const ids=S.subjects.map((_,s)=>s).filter(s=>S.jp[i+'_'+s]>0);return`<div class="card doc" style="${fit('per',ids.length,i)}">${kop()}<div class="dt"><span class="bn">JADWAL PELAJARAN KELAS ${c}</span><span class="ta">TAHUN PELAJARAN ${TA}</span></div>${schedTable(i,R,editMode)}${leg(ids)}${sign()}${ft()}</div>`}).join('')+'</div>'}}
+if(tab=='guru'){if(!S.sched)h+='<div class="card">Belum ada jadwal.</div>';else{h+=printBar(false)+'<div class="docs">';S.teachers.forEach((t,ti)=>{const ids=new Set(),body=grid((d,p)=>{const x=[];let fs=-1;S.classes.forEach((cn,c)=>{const s=S.sched[c][d][p];if(s>=0&&S.asg[c+'_'+s]==ti){x.push(`${cd(s)} (${cn})`);ids.add(s);if(fs<0)fs=s}});return`<td class="cd ${fs>=0?'cl':''}" ${fs>=0?`style="${sty(fs)}"`:''}>${esc(x.join(' / '))}</td>`},Math.max(...S.slots));h+=`<div class="card doc" style="${fit('per',ids.size,106)}">${kop()}<div class="dt"><span class="bn">JADWAL MENGAJAR</span><span class="ta">TAHUN PELAJARAN ${TA}</span></div><h2>${esc(t.n)}</h2>${body}${leg([...ids].sort((a,b)=>a-b))}${sign()}${ft()}</div>`});h+='</div>'}}
+if(tab=='cek'){h+=`<div class="card"><h2>Pemeriksaan konflik & JP</h2>${stTag}`+(S.sched?(R.err.length?`<ul>${R.err.map(e=>`<li class="er">${esc(e)}</li>`).join('')}</ul>`:'<p class="ok">Tidak ada bentrok guru/kelas, JP sesuai target, PAIPB/PJOK tidak terpecah, PJOK berada di JP 1–3 (sesuai batas JP), JP satu mapel pada satu hari berurutan, mapel utama tidak dipecah-pecah, setiap guru mengajar di semua hari belajar (sesuai jumlah sesinya), hari PJOK dan batas JP kelas dipenuhi, kokurikuler berada di akhir hari, dan jumlah mapel per hari tidak melebihi batas.</p>'):'<p>Belum ada jadwal.</p>')+`</div>
+<div class="card"><h2>Analisis beban mengajar</h2><div class="sc"><table><tr><th>Guru</th><th>JP target</th><th>JP terjadwal</th><th>Selisih</th><th>Hari</th><th>Jam kosong</th><th>Status</th></tr>${S.teachers.map((t,i)=>{const x=R.tl[i],df=x.act-x.tgt,ok=S.sched&&df==0;if(!x.tgt)return`<tr><td>${esc(t.n)}</td><td>0</td><td>-</td><td>-</td><td>0</td><td>0</td><td class="wn">Belum ada JP mengajar</td></tr>`;return`<tr><td>${esc(t.n)}</td><td>${x.tgt}</td><td>${S.sched?x.act:'-'}</td><td>${S.sched?df:'-'}</td><td>${x.days}</td><td>${x.gap}</td><td class="${!S.sched?'':ok?(x.gap?'wn':'ok'):'er'}">${!S.sched?'-':ok?(x.gap?'Peringatan':'Valid'):'Tidak valid'}</td></tr>`}).join('')}</table></div><small>Kesesuaian beban kerja guru menurut regulasi harus dinilai terpisah berdasarkan SK pembagian tugas resmi.</small></div>
+<div class="card"><h2>Riwayat perubahan</h2><ul>${S.log.slice().reverse().slice(0,30).map(l=>`<li>${esc(l)}</li>`).join('')||'<li>Belum ada.</li>'}</ul></div>`}
+if(tab=='exp')h+=`<div class="card"><h2>Ekspor & cadangan</h2><div class="row"><button class="b p" onclick="csv()">Unduh CSV jadwal (bisa dibuka di Excel)</button><button class="b" onclick="printTab('kelas','per')">Cetak Jadwal Kelas (1 halaman/kelas)</button><button class="b" onclick="printTab('kelas','all')">Cetak Semua Kelas (1 lembar)</button><button class="b" onclick="printTab('guru')">Cetak Jadwal Guru</button><button class="b g" onclick="bak()">Cadangkan data (JSON)</button><label class="b">Pulihkan JSON <input type="file" accept=".json" hidden onchange="imp(event)"></label><button class="b" onclick="reset()">Reset data</button></div><p>Data tersimpan di browser perangkat ini. Unduh cadangan secara berkala. Impor JSON diperiksa dulu; berkas rusak ditolak tanpa mengubah data.</p></div>`;
+$('#app').innerHTML=h}
+function render(){try{draw()}catch(e){console.error(e);$('#app').innerHTML=`<div class="card"><h2>Terjadi kesalahan saat menampilkan data</h2><p class="er">${esc(e.message)}</p><p>Data tidak dihapus. Unduh salinannya, atau atur ulang ke data awal.</p><div class="row"><button class="b" onclick="bak()">Unduh salinan data (JSON)</button><button class="b d" onclick="reset()">Atur ulang ke data awal</button></div></div>`}}
+load();render();
+</script></body></html>
